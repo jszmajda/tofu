@@ -2,6 +2,7 @@ import { FC, useState } from 'react';
 import { AppState, Conversation, Message } from '../lib/types';
 import { sendConversation } from '../lib/bedrock';
 import MessageView from './MessageView';
+import React from 'react';
 
 interface Props {
   appState: AppState;
@@ -9,7 +10,7 @@ interface Props {
 }
 
 const initialMessage: Message = {
-  role: 'user',
+  role: 'assistant',
   content: ''
 };
 
@@ -37,19 +38,40 @@ const ChatPanel: FC<Props> = ({ appState, updateActiveConversationMessages }) =>
     setInput('');
   };
 
+  
   return (
-    <div>
-      <div>
-        <h2>Active Conversation</h2>
+    <React.Fragment>
+
+      <div className="flex box-border grow overflow-y-auto flex-col flex-nowrap">
         {appState.activeConversation.messages.map((message, id) => (
           <MessageView key={id} id={id.toString()} message={message} />
         ))}
-        {responseMessage ?  <div>Assistant: {responseMessage.content}</div> : null}
+        {responseMessage ? <MessageView key="response" id="response" message={responseMessage} /> : null}
       </div>
-      <textarea value={input} onChange={(e) => setInput(e.target.value)} />
-      <button onClick={sendMessage}>Send</button>
-    </div>
+
+      <div className="gap-4 flex-none box-border">
+        <div className="flex">
+          <textarea className="flex-1 border border-gray-300 rounded-md p-2" value={input} onChange={(e) => setInput(e.target.value)} />
+          <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={sendMessage}>Send</button>
+        </div>
+      </div>
+
+    </React.Fragment>
   );
+
+
+  // return (
+  //   <div>
+  //     <div>
+  //       {appState.activeConversation.messages.map((message, id) => (
+  //         <MessageView key={id} id={id.toString()} message={message} />
+  //       ))}
+  //       {responseMessage ?  <div>Assistant: {responseMessage.content}</div> : null}
+  //     </div>
+  //     <textarea value={input} onChange={(e) => setInput(e.target.value)} />
+  //     <button onClick={sendMessage}>Send</button>
+  //   </div>
+  // );
 };
 
 export default ChatPanel;

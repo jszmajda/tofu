@@ -15,3 +15,9 @@
   }
 }
 */
+
+@layer utilities {
+  .debug * {
+    @apply border-[1px] border-red-500
+  }
+}
