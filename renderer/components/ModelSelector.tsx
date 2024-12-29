@@ -16,7 +16,7 @@ const ModelSelector: FC<Props> = ({ models, setModel }) => {
   };
 
   return (
-    <select onChange={handleChange}>
+    <select onChange={handleChange} className="select select-ghost">
       {models.map((model) => (
         <option key={model.modelId} value={model.modelId}>
           {model.name}

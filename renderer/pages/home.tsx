@@ -5,7 +5,6 @@ import Image from 'next/image'
 import { AppState, Message, Model } from '../lib/types';
 import { getAvailableModels } from '../lib/bedrock';
 import ModelSelector from '../components/ModelSelector';
-import ConversationList from '../components/ConversationList';
 import ChatPanel from '../components/ChatPanel';
 
 const initialAppState: AppState = {
@@ -64,48 +63,44 @@ export default function HomePage() {
         <title>Tofu - Home</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
-      <div className="h-screen flex bg-gray-200 overflow-y-hidden">
-        <aside className="w-auto bg-gray-800 text-white p-4">
-          <div className="flex items-center mb-4">
+      <div className="h-screen flex overflow-y-hidden">
+        <ul className="menu w-auto p-4">
+          <li className="flex flex-row items-center mb-4 menu-title">
             <Image src="/images/logo.png" alt="Tofu Logo" width={32} height={32} className="mr-2" />
-            <h1 className="text-2xl font-bold">Tofu</h1>
-          </div>
-          <ul className="space-y-2">
+            <h1 className="">Tofu</h1>
+          </li>
             <li>
-              <Link href="/home" className="block hover:bg-gray-700 p-2 rounded">
+              <Link href="/home">
                 Home
               </Link>
             </li>
             <li>
-              <Link href="/settings" className="block hover:bg-gray-700 p-2 rounded">
+              <Link href="/settings">
                 Settings
               </Link>
             </li>
-          </ul>
-          <div className="mt-4">
-            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+          <li className="mt-4">
+            <button className="btn btn-secondary">
               New Chat
             </button>
-          </div>
-          <div className="mt-4">
-            <h3 className="text-m font-bold">Conversations</h3>
-            <ul className="space-y-2">
-              {appState.conversations.map((conv) => (
-                <li key={conv.id}>
-                  <Link href={`/conversation/${conv.id}`} className="block hover:bg-gray-700 p-2 rounded">
-                    {conv.title}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </aside>
+          </li>
+          <li className="mt-4">
+            <h3 className="menu-title">Conversations</h3>
+          </li>
+          {appState.conversations.map((conv) => (
+            <li key={conv.id}>
+              <Link href={`/conversation/${conv.id}`} className="block hover:bg-gray-700 p-2 rounded">
+                {conv.title}
+              </Link>
+            </li>
+          ))}
+        </ul>
         <main className="flex flex-col flex-1 p-4">
           <h3 className="text-l font-bold">Conversation: {appState.activeConversation?.title}</h3>
-          <div className="mt-4">
+          <div className="mt-4 mb-4">
             <h3 className="text-m font-bold">
-              <span className="text-gray-600">Model: </span>
-              <span className="text-gray-600">
+              <span className="">Model: </span>
+              <span className="">
                 <ModelSelector models={models} setModel={setModel}/>
               </span>
             </h3>

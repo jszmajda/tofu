@@ -42,17 +42,17 @@ const ChatPanel: FC<Props> = ({ appState, updateActiveConversationMessages }) =>
   return (
     <React.Fragment>
 
-      <div className="flex box-border grow overflow-y-auto flex-col flex-nowrap">
-        {appState.activeConversation.messages.map((message, id) => (
-          <MessageView key={id} id={id.toString()} message={message} />
-        ))}
-        {responseMessage ? <MessageView key="response" id="response" message={responseMessage} /> : null}
+      <div className="grow overflow-y-auto w-full">
+          {appState.activeConversation.messages.map((message, id) => (
+            <MessageView key={id} id={id.toString()} message={message} />
+          ))}
+          {responseMessage?.content.length > 0 ? <MessageView key="response" id="response" message={responseMessage} /> : null}
       </div>
 
       <div className="gap-4 flex-none box-border">
         <div className="flex">
-          <textarea className="flex-1 border border-gray-300 rounded-md p-2" value={input} onChange={(e) => setInput(e.target.value)} />
-          <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={sendMessage}>Send</button>
+          <input type="text" className="flex-1 input input-bordered input-primary p-2" value={input} onChange={(e) => setInput(e.target.value)} />
+          <button className="py-2 px-4 btn btn-primary" onClick={sendMessage}>Send</button>
         </div>
       </div>
 
