@@ -1,6 +1,12 @@
 import { BedrockRuntimeClient, ConverseStreamCommand } from "@aws-sdk/client-bedrock-runtime";
 import { Conversation, Message, Model } from "./types";
 
+declare global {
+    interface Window {
+        awsCreds?: any
+    }
+}
+
 export const getAvailableModels = async (): Promise<Model[]> => {
     return [
         {
