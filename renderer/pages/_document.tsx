@@ -6,6 +6,7 @@ class MyDocument extends Document {
       <Html data-theme="garden">
         <Head>
           <link rel="icon" type="image/svg+xml" href="path/to/favicon.svg"/>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         </Head>
         <body>
           <Main />

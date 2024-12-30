@@ -3,10 +3,10 @@ import { AppState, Conversation, Message } from '../lib/types';
 import { sendConversation } from '../lib/bedrock';
 import MessageView from './MessageView';
 import React from 'react';
+import * as atoms from '../lib/atoms';
+import { useAtom } from 'jotai';
 
 interface Props {
-  appState: AppState;
-  updateActiveConversationMessages: (messages: Message[]) => void;
 }
 
 const initialMessage: Message = {
@@ -14,29 +14,32 @@ const initialMessage: Message = {
   content: ''
 };
 
-const ChatPanel: FC<Props> = ({ appState, updateActiveConversationMessages }) => {
+const ChatPanel: FC<Props> = ({ }) => {
   const [input, setInput] = useState('');
   const [responseMessage, setResponseMessage] = useState(initialMessage);
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
   const messagesEndRef = useRef(null);
   const containerRef = useRef(null);
 
+  const [currentModel, ] = useAtom(atoms.currentModel);
+  const [activeConversation, ] = useAtom(atoms.activeConversation);
+  const [messages, setMessages] = useAtom(atoms.activeConversationMessages);
+
   const sendMessage = async () => {
     const userMessage: Message = { role: 'user', content: input };
     const aiMessage: Message = { role: 'assistant', content: '' };
-    const updatedConversation: Conversation = {
-      ...appState.activeConversation,
-      messages: [...appState.activeConversation.messages, userMessage]
-    };
-    updateActiveConversationMessages([...appState.activeConversation.messages, userMessage]);
 
-    console.log("sending conversation", updatedConversation);
-    for await (const message of sendConversation(appState.currentModel, updatedConversation)){
+    messages.push(userMessage);
+    setMessages(messages);
+
+    console.log("sending conversation", messages);
+    for await (const message of sendConversation(currentModel, messages)){
       aiMessage.content = message.content;
       setResponseMessage(message);
     }
 
-    updateActiveConversationMessages([...appState.activeConversation.messages, userMessage, aiMessage]);
+    messages.push(aiMessage);
+    setMessages(messages);
     setResponseMessage(undefined);
     console.log("done receiving", aiMessage);
     setInput('');
@@ -51,7 +54,7 @@ const ChatPanel: FC<Props> = ({ appState, updateActiveConversationMessages }) =>
     };
 
     scrollToBottom();
-  }, [shouldAutoScroll, appState.activeConversation.messages, responseMessage]);
+  }, [shouldAutoScroll, messages, responseMessage]);
 
   const handleScroll = (e) => {
     const container = containerRef.current;
@@ -66,7 +69,7 @@ const ChatPanel: FC<Props> = ({ appState, updateActiveConversationMessages }) =>
   return (
     <React.Fragment>
       <div ref={containerRef} className="grow overflow-y-auto w-full" onScroll={handleScroll}>
-          {appState.activeConversation.messages.map((message, id) => (
+          {messages.map((message, id) => (
             <MessageView key={id} id={id.toString()} message={message} />
           ))}
           {responseMessage?.content.length > 0 ? <MessageView key="response" id="response" message={responseMessage} /> : null}

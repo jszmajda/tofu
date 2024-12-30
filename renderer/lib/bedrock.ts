@@ -33,8 +33,8 @@ export const getAvailableModels = async (): Promise<Model[]> => {
     ];
 };
 
-const conversationToMessages = (conversation: Conversation): BedrockMessage[] => {
-    return conversation.messages.map((message: Message) => ({
+const conversationToMessages = (messages: Message[]): BedrockMessage[] => {
+    return messages.map((message: Message) => ({
         role: message.role,
         content: [{ text: message.content }]
     }));
@@ -42,7 +42,7 @@ const conversationToMessages = (conversation: Conversation): BedrockMessage[] =>
 
 export const sendConversation = async function * (
     model: Model,
-    conversation: Conversation
+    messages: Message[]
 ): AsyncGenerator<Message, Message, undefined> {
 
     const creds: AWSCreds = await window.awsCreds.getAwsCreds()
@@ -61,7 +61,7 @@ export const sendConversation = async function * (
         modelId: model.modelId,
         // eslint-disable-next-line
         // @ts-ignore
-        messages: conversationToMessages(conversation), //eslint-disable-line
+        messages: conversationToMessages(messages), //eslint-disable-line
         inferenceConfig
     })
 

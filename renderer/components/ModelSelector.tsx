@@ -1,12 +1,15 @@
 import { FC } from 'react';
 import { Model } from '../lib/types';
+import { useAtom } from 'jotai';
+import { availableModels, currentModel } from '../lib/atoms';
 
 interface Props {
-  models: Model[];
-  setModel: (model: Model) => void;
-}
+};
 
-const ModelSelector: FC<Props> = ({ models, setModel }) => {
+const ModelSelector: FC<Props> = ({ }) => {
+
+  const [models, setAvailableModels]: [Model[], any] = useAtom(availableModels);
+  const [model, setModel] = useAtom(currentModel);
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const model = models.find((model) => model.modelId === event.target.value);
