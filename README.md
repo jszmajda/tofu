@@ -1,4 +1,6 @@
-# Tofu: An Electron-based AI Chat Application
+
+# <img src="renderer/public/images/tofu-small.png" alt="Tofu Logo" height="30" /> Tofu: An Electron-based AI Chat Application
+
 
 Tofu is a desktop application built with Electron that provides an interface for interacting with AI models through Amazon Bedrock. It offers a user-friendly chat experience with support for multiple AI models.
 
