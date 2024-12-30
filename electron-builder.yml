@@ -1,6 +1,6 @@
-appId: com.example.nextron
-productName: My Nextron App
-copyright: Copyright © 2018 Yoshihide Shiono
+appId: love.ananta.tofu
+productName: Tofu
+copyright: Copyright © 2024 Jessica Szmajda
 directories:
   output: dist
   buildResources: resources

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+  <!-- Background rectangle with rounded corners -->
+  <rect 
+    x="1" 
+    y="1" 
+    width="14" 
+    height="14" 
+    rx="2" 
+    fill="#FFFAF0" 
+    stroke="#8B4513" 
+    stroke-width="1"
+  />
+  
+  <!-- Eyes -->
+  <circle cx="5" cy="7" r="1.2" fill="#8B4513" />
+  <circle cx="11" cy="7" r="1.2" fill="#8B4513" />
+  
+  <!-- Smile -->
+  <path 
+    d="M5.5 10 Q8 11.5 10.5 10" 
+    fill="none" 
+    stroke="#8B4513" 
+    stroke-width="1" 
+    stroke-linecap="round"
+  />
+  
+  <!-- Cheeks -->
+  <circle cx="4" cy="9" r="1" fill="#FFB6C1" opacity="0.6" />
+  <circle cx="12" cy="9" r="1" fill="#FFB6C1" opacity="0.6" />
+</svg>

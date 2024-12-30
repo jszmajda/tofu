@@ -66,7 +66,7 @@ export default function HomePage() {
       <div className="h-screen flex overflow-y-hidden">
         <ul className="menu w-auto p-4">
           <li className="flex flex-row items-center mb-4 menu-title">
-            <Image src="/images/logo.png" alt="Tofu Logo" width={32} height={32} className="mr-2" />
+            <Image src="/images/tofu-small.png" alt="Tofu Logo" width={64} height={64} className="mr-2" />
             <h1 className="">Tofu</h1>
           </li>
             <li>

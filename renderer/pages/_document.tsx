@@ -5,6 +5,7 @@ class MyDocument extends Document {
     return (
       <Html data-theme="garden">
         <Head>
+          <link rel="icon" type="image/svg+xml" href="path/to/favicon.svg"/>
         </Head>
         <body>
           <Main />
