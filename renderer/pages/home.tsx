@@ -18,6 +18,7 @@ const HomePage: FC<Props> = ({ }) => {
   return (
     <>
       <h3 className="text-l font-bold">Conversation: {activeConversation?.title}</h3>
+
       <div className="mt-4 mb-4">
         <h3 className="text-m font-bold">
           <span className="">Model: </span>
@@ -26,6 +27,7 @@ const HomePage: FC<Props> = ({ }) => {
           </span>
         </h3>
       </div>
+
       <ChatPanel />
     </>
   )

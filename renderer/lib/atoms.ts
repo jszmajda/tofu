@@ -5,6 +5,8 @@ import { Conversation, Model } from './types';
 import { getAvailableModels } from './bedrock';
 import { atom } from 'jotai';
 
+export const theme = atomWithStorage<string>('theme', 'cupcake');
+
 export const availableModels = atomWithLazy<Promise<Model[]>>(async () => {
     return await getAvailableModels();
 });

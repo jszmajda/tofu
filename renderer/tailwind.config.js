@@ -1,4 +1,5 @@
 const colors = require('tailwindcss/colors')
+const themes = require('./lib/themes')
 
 module.exports = {
   content: [
@@ -10,9 +11,10 @@ module.exports = {
   },
   plugins: [
     require('daisyui'),
+    require('@tailwindcss/typography')
   ],
   daisyui: {
-    themes: true,
+    themes: themes,
     darkTheme: "dark",
     base: true,
     styled: true,

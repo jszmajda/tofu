@@ -31,6 +31,7 @@ const ChatPanel: FC<Props> = ({ }) => {
 
     messages.push(userMessage);
     setMessages(messages);
+    setInput('');
 
     console.log("sending conversation", messages);
     for await (const message of sendConversation(currentModel, messages)){
@@ -42,7 +43,6 @@ const ChatPanel: FC<Props> = ({ }) => {
     setMessages(messages);
     setResponseMessage(undefined);
     console.log("done receiving", aiMessage);
-    setInput('');
   };
 
   
@@ -94,7 +94,17 @@ const ChatPanel: FC<Props> = ({ }) => {
       )}     
       <div className="gap-4 flex-none box-border">
         <div className="flex">
-          <textarea className="flex-1 input input-bordered input-primary p-2" value={input} onChange={(e) => setInput(e.target.value)} />
+          <textarea 
+            className="flex-1 input input-bordered input-primary p-2" 
+            value={input} 
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+              }
+            }}
+          />
           <button className="py-2 px-4 btn btn-primary" onClick={sendMessage}>Send</button>
         </div>
       </div>

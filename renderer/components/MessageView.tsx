@@ -1,38 +1,48 @@
 import { FC } from "react";
 import { Message } from "../lib/types";
+import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter'
+import nightOwl from "react-syntax-highlighter/dist/cjs/styles/prism/night-owl";
+import ReactMarkdown from 'react-markdown';
 
 interface Props {
-    id: string;
-    message: Message;
+  id: string;
+  message: Message;
 }
+
 const MessageView: FC<Props> = ({ id, message }) => {
-    const messageParts = message.content.split('\n');
-
-    // should render as chat bubbles, user and assistant messages should have different background colors
-    return (
-        <div key={id} className={`chat ${message.role === 'user' ? 'chat-start' : 'chat-end'}`}>
-            <div className="chat-header">{message.role}</div>
-            <div className={`chat-bubble ${message.role === 'user' ? 'chat-bubble-info' : 'chat-bubble-accent'}`}>{messageParts.map((part, index) => {
-                return (
-                    <p key={index}>{part}</p>
-                )
-            })}</div>
-        </div>
-    ) 
-
-
-    // return (
-    //     <div key={id} className="">
-    //         <span className="">{message.role}</span>
-    //         <span className="">{
-    //             messageParts.map((part, index) => {
-    //                 return (
-    //                     <p key={index}>{part}</p>
-    //                 )
-    //             })
-    //             }</span>
-    //     </div>
-    // )
+  return (
+    <div key={id} className={`chat ${message.role === 'user' ? 'chat-start' : 'chat-end'}`}>
+      <div className="chat-header">{message.role}</div>
+      <div className={`text-sm prose chat-bubble ${message.role === 'user' ? 'chat-bubble-info' : 'chat-bubble-accent'}`}>
+        <ReactMarkdown
+          children={message.content}
+          components={{
+            a: ({ node, ...props }) => (
+              <a {...props} target="_blank" rel="noreferrer" />
+            ),
+            code: ({ className, children, ...props }) => {
+              const match = /language-(\w+)/.exec(className || "");
+              return match ? (
+                <SyntaxHighlighter
+                  style={nightOwl}
+                  language={match[1]}
+                  PreTag="div"
+                  useInlineStyles
+                  {...props}
+                >
+                  {String(children).replace(/\n$/, "")}
+                </SyntaxHighlighter>
+              ) : (
+                <code className={className} {...props}>
+                  {children}
+                </code>
+              );
+            },
+          }}
+           />
+      </div>
+    </div>
+  )
 }
 
 export default MessageView;
