@@ -25,3 +25,9 @@ export type AppState = {
     conversations: Conversation[];
     activeConversation: Conversation;
 };
+
+export interface AWSCreds {
+  AccessKeyId: string;
+  SecretAccessKey: string;
+  SessionToken?: string;
+}

@@ -3,17 +3,42 @@ import path from 'path'
 import { app, ipcMain } from 'electron'
 import serve from 'electron-serve'
 import { createWindow } from './helpers'
+import { AWSCreds } from '../renderer/lib/types'
+import { execSync } from 'child_process';
 
 
-const credsData = fs.readFileSync(path.join(process.env.HOME, '.aws', 'credentials'), {encoding: 'utf8', flag: 'r'});
-// read aws credentials from file and set into an object
-const credentials = credsData.split('\n').reduce((acc: any, line) => {
-    const [key, value]: string[] = line.split('=')
-    if (key && value) {
+const loadCredentials = () => {
+  let credentials: AWSCreds = {
+    AccessKeyId: undefined,
+    SecretAccessKey: undefined
+  }
+  try {
+    const awsCredentials = execSync('aws configure export-credentials').toString();
+    credentials = JSON.parse(awsCredentials);
+  } catch (error) {
+    console.log('Could not load AWS credentials:', error);
+
+    // try loading it from the credentials file
+    const credsData = fs.readFileSync(path.join(process.env.HOME, '.aws', 'credentials'), { encoding: 'utf8', flag: 'r' });
+    // read aws credentials from file and set into an object
+    credentials = credsData.split('\n').reduce((acc: any, line) => {
+      const [key, value]: string[] = line.split('=')
+      if (key && value) {
         acc[key.trim()] = value.trim()
-    }
-    return acc
-}, {});
+      }
+      return acc
+    }, {});
+  }
+  return credentials;
+}
+
+// Initial load of credentials
+loadCredentials();
+
+// Handle IPC requests for credential updates
+ipcMain.handle('getAwsCreds', async () => {
+  return loadCredentials();
+});
 
 const isProd = process.env.NODE_ENV === 'production'
 
@@ -53,21 +78,9 @@ if (isProd) {
 
   if (isProd) {
     await mainWindow.loadURL('app://./home')
-      .then(() => {
-        mainWindow.webContents.send('awsCreds', credentials);
-        mainWindow.webContents.on('did-finish-load', () => {
-          mainWindow.webContents.send('awsCreds', credentials);
-        });
-      })
   } else {
     const port = process.argv[2]
     await mainWindow.loadURL(`http://localhost:${port}/home`)
-      .then(() => {
-        mainWindow.webContents.send('awsCreds', credentials);
-        mainWindow.webContents.on('did-finish-load', () => {
-          mainWindow.webContents.send('awsCreds', credentials);
-        });
-      })
     // mainWindow.webContents.openDevTools()
   }
 })()

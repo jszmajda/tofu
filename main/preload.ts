@@ -1,18 +1,13 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron'
+import { AWSCreds } from '../renderer/lib/types'
 
-interface AWSCreds {
-  accessKeyId: string;
-  secretAccessKey: string;
-}
 
-let awsCreds: AWSCreds = null;
 // when ipc receives an awsCreds message, set the object received to be exposed in the main world
-ipcRenderer.on('awsCreds', (event, arg) => {
-    awsCreds = arg;
-});
 contextBridge.exposeInMainWorld('awsCreds', {
-    getAwsCreds: () => {
-        return awsCreds;
+    getAwsCreds: async (): Promise<AWSCreds> => {
+        const creds = await ipcRenderer.invoke('getAwsCreds');
+        console.log("-- creds --", creds);
+        return creds;
     }
 })
 

@@ -1,5 +1,5 @@
 import { BedrockRuntimeClient, ConverseStreamCommand } from "@aws-sdk/client-bedrock-runtime";
-import { Conversation, Message, Model } from "./types";
+import { AWSCreds, Conversation, Message, Model } from "./types";
 
 declare global {
     interface Window {
@@ -36,11 +36,7 @@ export const getAvailableModels = async (): Promise<Model[]> => {
 const conversationToMessages = (conversation: Conversation): BedrockMessage[] => {
     return conversation.messages.map((message: Message) => ({
         role: message.role,
-        content: [
-            {
-                text: message.content
-            }
-        ]
+        content: [{ text: message.content }]
     }));
 };
 
@@ -49,14 +45,14 @@ export const sendConversation = async function * (
     conversation: Conversation
 ): AsyncGenerator<Message, Message, undefined> {
 
-    console.log(`sending conversation to`, model);
+    const creds: AWSCreds = await window.awsCreds.getAwsCreds()
 
     const client = new BedrockRuntimeClient({ 
         region: model.region,
         credentials: {
-            accessKeyId: window.awsCreds.getAwsCreds().aws_access_key_id,
-            secretAccessKey: window.awsCreds.getAwsCreds().aws_secret_access_key
-
+            accessKeyId: creds.AccessKeyId,
+            secretAccessKey: creds.SecretAccessKey,
+            sessionToken: creds.SessionToken,
         }
     });
     const inferenceConfig = { maxTokens: 4096, temperature: 0.1, topP: 0.9 };
@@ -76,7 +72,6 @@ export const sendConversation = async function * (
         for await (const item of response.stream) {
             if (item.contentBlockDelta) {
                 const chunk: string = item.contentBlockDelta.delta?.text;
-                console.log("chunk", chunk);
                 responseMessage.content += chunk;
                 yield responseMessage;
             }
