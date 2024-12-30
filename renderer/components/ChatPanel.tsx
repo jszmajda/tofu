@@ -91,7 +91,7 @@ const ChatPanel: FC<Props> = ({ appState, updateActiveConversationMessages }) =>
       )}     
       <div className="gap-4 flex-none box-border">
         <div className="flex">
-          <input type="text" className="flex-1 input input-bordered input-primary p-2" value={input} onChange={(e) => setInput(e.target.value)} />
+          <textarea className="flex-1 input input-bordered input-primary p-2" value={input} onChange={(e) => setInput(e.target.value)} />
           <button className="py-2 px-4 btn btn-primary" onClick={sendMessage}>Send</button>
         </div>
       </div>
