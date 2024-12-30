@@ -12,31 +12,21 @@ interface Props {
 }
 
 const HomePage: FC<Props> = ({ }) => {
-  const [activeConversation, ] = useAtom(atoms.activeConversation);
+  const [activeConversation,] = useAtom(atoms.activeConversation);
 
   // layout should be a left-hand nav panel, that also shows the conversations from appstate in a scrollable list below the home and settings links. To the right of the nav panel is a full-screen chat window, with a new chat input below the message history.
   return (
     <>
-      <Head>
-        <title>Tofu - Home</title>
-      </Head>
-      <div className="h-screen flex overflow-y-hidden">
-
-        <Sidebar />
-
-        <main className="flex flex-col flex-1 p-4">
-          <h3 className="text-l font-bold">Conversation: {activeConversation?.title}</h3>
-          <div className="mt-4 mb-4">
-            <h3 className="text-m font-bold">
-              <span className="">Model: </span>
-              <span className="">
-                <ModelSelector />
-              </span>
-            </h3>
-          </div>
-          <ChatPanel />
-        </main>
+      <h3 className="text-l font-bold">Conversation: {activeConversation?.title}</h3>
+      <div className="mt-4 mb-4">
+        <h3 className="text-m font-bold">
+          <span className="">Model: </span>
+          <span className="">
+            <ModelSelector />
+          </span>
+        </h3>
       </div>
+      <ChatPanel />
     </>
   )
 }
