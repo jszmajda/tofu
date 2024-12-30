@@ -12,7 +12,7 @@ const MessageView: FC<Props> = ({ id, message }) => {
     return (
         <div key={id} className={`chat ${message.role === 'user' ? 'chat-start' : 'chat-end'}`}>
             <div className="chat-header">{message.role}</div>
-            <div className="chat-bubble">{messageParts.map((part, index) => {
+            <div className={`chat-bubble ${message.role === 'user' ? 'chat-bubble-info' : 'chat-bubble-accent'}`}>{messageParts.map((part, index) => {
                 return (
                     <p key={index}>{part}</p>
                 )
