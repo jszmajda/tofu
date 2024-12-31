@@ -5,11 +5,16 @@ export type Message = {
     outputTokens?: number;
 };
 
+export interface ConversationSet {
+    [key: string]: Conversation;
+}
+
 export type Conversation = {
-    id: number;
+    id: string;
     title: string;
     messages: Message[];
     totalCost: number;
+    currentModel: Model;
 };
 
 export type Model = {

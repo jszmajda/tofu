@@ -70,8 +70,12 @@ export const sendConversation = async function * (
     try {
         const response = await client.send(command);
         for await (const item of response.stream) {
+        // const test = ["hi ", "there"];
+        // for await (const item of test){
             if (item.contentBlockDelta) {
+            // if (item){
                 const chunk: string = item.contentBlockDelta.delta?.text;
+                // const chunk: string = item;
                 responseMessage.content += chunk;
                 yield responseMessage;
             }

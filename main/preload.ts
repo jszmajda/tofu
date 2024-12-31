@@ -6,7 +6,6 @@ import { AWSCreds } from '../renderer/lib/types'
 contextBridge.exposeInMainWorld('awsCreds', {
     getAwsCreds: async (): Promise<AWSCreds> => {
         const creds = await ipcRenderer.invoke('getAwsCreds');
-        console.log("-- creds --", creds);
         return creds;
     }
 })

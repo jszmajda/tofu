@@ -1,20 +1,21 @@
-import { FC } from 'react';
+import { act, FC } from 'react';
 import { Model } from '../lib/types';
 import { useAtom } from 'jotai';
-import { availableModels, currentModel } from '../lib/atoms';
+import * as atoms from '../lib/atoms';
 
 interface Props {
 };
 
 const ModelSelector: FC<Props> = ({ }) => {
 
-  const [models, setAvailableModels]: [Model[], any] = useAtom(availableModels);
-  const [model, setModel] = useAtom(currentModel);
+  const [models, ]: [Model[], any] = useAtom(atoms.availableModels);
+  const [, setModel] = useAtom(atoms.currentModel);
+  const [activeConversation, setActiveConversation] = useAtom(atoms.activeConversation)
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const model = models.find((model) => model.modelId === event.target.value);
-    if (model) {
-      setModel(model);
+    if (model && activeConversation && activeConversation.currentModel != model){
+      setActiveConversation({...activeConversation, currentModel: model});
     }
   };
 

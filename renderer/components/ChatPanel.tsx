@@ -1,3 +1,4 @@
+'use client';
 import { FC, useState, useRef, useEffect } from 'react';
 import { AppState, Conversation, Message } from '../lib/types';
 import { sendConversation } from '../lib/bedrock';
@@ -22,25 +23,29 @@ const ChatPanel: FC<Props> = ({ }) => {
   const containerRef = useRef(null);
 
   const [currentModel, ] = useAtom(atoms.currentModel);
-  const [activeConversation, ] = useAtom(atoms.activeConversation);
-  const [messages, setMessages] = useAtom(atoms.activeConversationMessages);
+  const [messages, ] = useAtom(atoms.activeConversationMessages);
+  const [activeConversation, setActiveConversation] = useAtom(atoms.activeConversation);
 
   const sendMessage = async () => {
     const userMessage: Message = { role: 'user', content: input };
     const aiMessage: Message = { role: 'assistant', content: '' };
-
-    messages.push(userMessage);
-    setMessages(messages);
+    const nextMessages: Message[] = [...messages];
+    const nextConversation: Conversation = { ...activeConversation, messages: nextMessages };
+    const model = activeConversation.currentModel || currentModel;
     setInput('');
 
+    nextMessages.push(userMessage);
+    setActiveConversation(nextConversation);
+    // setMessages(nextMessages);
+
     console.log("sending conversation", messages);
-    for await (const message of sendConversation(currentModel, messages)){
+    for await (const message of sendConversation(model, nextMessages)){
       aiMessage.content = message.content;
       setResponseMessage(message);
     }
 
-    messages.push(aiMessage);
-    setMessages(messages);
+    nextMessages.push(aiMessage);
+    setActiveConversation(nextConversation);
     setResponseMessage(undefined);
     console.log("done receiving", aiMessage);
   };
@@ -68,7 +73,7 @@ const ChatPanel: FC<Props> = ({ }) => {
 
   return (
     <React.Fragment>
-      <div ref={containerRef} className="grow overflow-y-auto w-full" onScroll={handleScroll}>
+      <div ref={containerRef} className="grow overflow-y-auto w-full overscroll-contain" onScroll={handleScroll}>
           {messages.map((message, id) => (
             <MessageView key={id} id={id.toString()} message={message} />
           ))}
