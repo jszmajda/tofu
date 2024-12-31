@@ -14,8 +14,11 @@ const ModelSelector: FC<Props> = ({ }) => {
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const model = models.find((model) => model.modelId === event.target.value);
-    if (model && activeConversation && activeConversation.currentModel != model){
-      setActiveConversation({...activeConversation, currentModel: model});
+    if (model){
+      setModel(model);
+      if(activeConversation && activeConversation.currentModel != model){
+        setActiveConversation({...activeConversation, currentModel: model});
+      }
     }
   };
 

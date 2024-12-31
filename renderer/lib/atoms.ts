@@ -1,7 +1,5 @@
-
-import { focusAtom } from 'jotai-optics';
 import { atomWithLazy, atomWithStorage } from 'jotai/utils';
-import { Conversation, ConversationSet, Model } from './types';
+import { Conversation, ConversationSet, Message, Model } from './types';
 import { getAvailableModels } from './bedrock';
 import { atom } from 'jotai';
 
@@ -10,8 +8,21 @@ export const theme = atomWithStorage<string>('theme', 'cupcake');
 export const availableModels = atomWithLazy<Promise<Model[]>>(async () => {
   return await getAvailableModels();
 });
-
-
+const currentModelStorage = atomWithStorage<Model>('currentModel', null);
+export const currentModel = atom<Model>(
+  (get) => {
+    const currStorage = get(currentModelStorage);
+    if (currStorage) {
+      return currStorage;
+    } else {
+      return get(availableModels).then((models) => models[0]);
+    }
+  },
+  // @ts-ignore
+  (_get, set, update: Model) => {
+    set(currentModelStorage, update);
+  }
+);
 
 export const conversations = atomWithStorage<ConversationSet>('conversations', {});
 export const activeConversationId = atom<string>("");
@@ -33,16 +44,13 @@ export const activeConversation = atom<Conversation>(
   }
 );
 
-export const activeConversationMessages = atom((get) => {
-  const convo = get(activeConversation);
-  return convo?.messages || [];
-});
+export const activeConversationMessages = atom<Message[]>([])
 
-export const currentModel = atom<Model | Promise<Model>>((get) => {
-  const convo = get(activeConversation);
-  if (convo && convo.currentModel) {
-    return convo.currentModel;
-  } else {
-    return get(availableModels).then((models) => models[0]);
-  }
-});
+// export const currentModel = atom<Model | Promise<Model>>((get) => {
+//   const convo = get(activeConversation);
+//   if (convo && convo.currentModel) {
+//     return convo.currentModel;
+//   } else {
+//     return get(availableModels).then((models) => models[0]);
+//   }
+// });

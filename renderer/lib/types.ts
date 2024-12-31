@@ -1,34 +1,39 @@
 export type Message = {
-    role: "assistant" | "user";
-    content: string;
-    inputTokens?: number;
-    outputTokens?: number;
+  id: number;
+  role: "assistant" | "user";
+  content: string;
+  inputTokens?: number;
+  outputTokens?: number;
+  timestamp: Date;
+  modelId: string;
 };
 
 export interface ConversationSet {
-    [key: string]: Conversation;
+  [key: string]: Conversation;
 }
 
 export type Conversation = {
-    id: string;
-    title: string;
-    messages: Message[];
-    totalCost: number;
-    currentModel: Model;
+  id: string;
+  title: string;
+  messages: Message[];
+  totalCost: number;
+  currentModel: Model;
+  firstMessageDate: Date;
+  lastMessageDate: Date;
 };
 
 export type Model = {
-    name: string;
-    modelId: string;
-    costPerInputTokenK: number;
-    costPerOutputTokenK: number;
-    region: string;
+  name: string;
+  modelId: string;
+  costPerInputTokenK: number;
+  costPerOutputTokenK: number;
+  region: string;
 };
 
 export type AppState = {
-    currentModel: Model;
-    conversations: Conversation[];
-    activeConversation: Conversation;
+  currentModel: Model;
+  conversations: Conversation[];
+  activeConversation: Conversation;
 };
 
 export interface AWSCreds {

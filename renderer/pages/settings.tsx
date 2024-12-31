@@ -8,19 +8,29 @@ interface Props {
 
 const SettingsPage: FC<Props> = ({}) => {
   const [theme, setTheme] = useAtom(atoms.theme);
+  const [, setConversations] = useAtom(atoms.conversations);
+  const [, setActiveConversationMessages] = useAtom(atoms.activeConversationMessages);
+  const [, setActiveConversationId] = useAtom(atoms.activeConversationId);
 
   useEffect(() => {
     document.querySelector('html').setAttribute('data-theme', theme);
   }, [theme])
+
+  const resetStorage = () => {
+    localStorage.clear();
+    setConversations({});
+    setActiveConversationId("");
+    setActiveConversationMessages([]);
+  }
 
   return (
     <div>
       <h1 className="text-lg font-bold">Settings</h1>
       <hr/>
 
-      <div className="grid grid-cols-2 gap-2 mt-4 grid-cols-[30%_70%]">
+      <div className="grid gap-2 mt-4 grid-cols-[30%_70%]">
         <div>Flush Local Storage</div>
-        <div><button className="btn btn-secondary btn-sm" onClick={() => { if(confirm("Are you sure?")){ localStorage.clear() }}}>Flush</button></div>
+        <div><button className="btn btn-secondary btn-sm" onClick={() => { if(confirm("Are you sure?")){ resetStorage() }}}>Flush</button></div>
 
         <div>Change Theme</div>
         <div>

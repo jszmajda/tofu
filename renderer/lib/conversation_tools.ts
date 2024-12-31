@@ -1,7 +1,8 @@
-import { Conversation } from "./types";
+import { Conversation, Message, Model } from "./types";
 
 export const buildDefaultConversation = (): Conversation => {
-  const id = new Date().toISOString();
+  const now = new Date();
+  const id = now.toISOString();
   return {
     messages: [
       // { role: 'user', content: 'test' },
@@ -12,6 +13,46 @@ export const buildDefaultConversation = (): Conversation => {
     totalCost: 0,
     id: id,
     title: id,
-    currentModel: null
+    currentModel: null,
+    firstMessageDate: now,
+    lastMessageDate: now
   }
+}
+
+export const buildNewMessage = (mset: Message[], role: "user" | "assistant", content: string, currentModel: Model): Message => {
+  const id = mset.length;
+  const msg = {
+    id: id,
+    role: role,
+    content: content,
+    timestamp: new Date(),
+    modelId: currentModel.modelId
+  }
+  return msg;
+}
+
+export const updateConversationMessages = (conversation: Conversation, messages: Message[]): Conversation => {
+  const newConversation: Conversation = {
+    ...conversation,
+    messages: messages,
+    firstMessageDate: messages[0]?.timestamp || conversation.firstMessageDate,
+    lastMessageDate: messages[messages.length - 1]?.timestamp || conversation.lastMessageDate
+  }
+  return newConversation;
+}
+
+export const costOfConversation = (conversation: Conversation, availableModels: Model[]): number => {
+  const cost = conversation?.messages.reduce((acc, message) => {
+    const model = availableModels.find(m => m.modelId === message.modelId);
+    if (model) {
+      console.log(`model ${model.name} for ${message.inputTokens} and ${message.outputTokens}`);
+      const inputCost = (message.inputTokens || 0) * (model.costPerInputTokenK / 1000);
+      const outputCost = (message.outputTokens || 0) * (model.costPerOutputTokenK / 1000);
+      return acc + inputCost + outputCost;
+    } else{
+      return acc;
+    }
+  }, 0) || 0; 
+  console.log(`cost of ${conversation?.title} is ${cost}`);
+  return cost;
 }

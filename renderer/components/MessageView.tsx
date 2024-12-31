@@ -3,17 +3,19 @@ import { Message } from "../lib/types";
 import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter'
 import nightOwl from "react-syntax-highlighter/dist/cjs/styles/prism/night-owl";
 import ReactMarkdown from 'react-markdown';
+import DateFmt from "./DateFmt";
 
 interface Props {
   id: string;
   message: Message;
+  targetRef?: React.RefObject<HTMLDivElement>;
 }
 
-const MessageView: FC<Props> = ({ id, message }) => {
+const MessageView: FC<Props> = ({ id, message, targetRef }) => {
   return (
     <div key={id} className={`chat ${message.role === 'user' ? 'chat-start' : 'chat-end'}`}>
-      <div className="chat-header">{message.role}</div>
-      <div className={`text-sm prose chat-bubble ${message.role === 'user' ? 'chat-bubble-info' : 'chat-bubble-accent'}`}>
+      <div className="chat-header">{message.role} @ <DateFmt date={message.timestamp} format="chat"/></div>
+      <div className={`text-sm prose chat-bubble ${message.role === 'user' ? 'chat-bubble-info' : 'chat-bubble-accent'}`} ref={targetRef}>
         <ReactMarkdown
           children={message.content}
           components={{

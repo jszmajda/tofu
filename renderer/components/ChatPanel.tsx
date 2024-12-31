@@ -6,60 +6,66 @@ import MessageView from './MessageView';
 import React from 'react';
 import * as atoms from '../lib/atoms';
 import { useAtom } from 'jotai';
+import { buildNewMessage, updateConversationMessages } from '../lib/conversation_tools';
+import { marked } from 'marked';
 
 interface Props {
 }
 
-const initialMessage: Message = {
-  role: 'assistant',
-  content: ''
-};
-
 const ChatPanel: FC<Props> = ({ }) => {
   const [input, setInput] = useState('');
-  const [responseMessage, setResponseMessage] = useState(initialMessage);
+  // const [responseMessage, setResponseMessage] = useState(initialMessage);
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
   const messagesEndRef = useRef(null);
   const containerRef = useRef(null);
+  const responseRef = useRef(null);
 
   const [currentModel, ] = useAtom(atoms.currentModel);
-  const [messages, ] = useAtom(atoms.activeConversationMessages);
   const [activeConversation, setActiveConversation] = useAtom(atoms.activeConversation);
+  const [messages, setActiveConversationMessages]: [Message[], any] = useAtom(atoms.activeConversationMessages);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const responseMessage: Message = {id: -1, role: "assistant", content: "", timestamp: new Date(), modelId: currentModel.modelId}
 
   const sendMessage = async () => {
-    const userMessage: Message = { role: 'user', content: input };
-    const aiMessage: Message = { role: 'assistant', content: '' };
+    setIsGenerating(true);
     const nextMessages: Message[] = [...messages];
-    const nextConversation: Conversation = { ...activeConversation, messages: nextMessages };
+    const userMessage: Message = buildNewMessage(nextMessages, 'user', input, currentModel);
+    nextMessages[userMessage.id] = userMessage;
+    setActiveConversationMessages(nextMessages);
+
+    const aiMessage: Message = buildNewMessage(nextMessages, 'assistant', '', currentModel);
     const model = activeConversation.currentModel || currentModel;
     setInput('');
 
-    nextMessages.push(userMessage);
-    setActiveConversation(nextConversation);
     // setMessages(nextMessages);
 
-    console.log("sending conversation", messages);
-    for await (const message of sendConversation(model, nextMessages)){
-      aiMessage.content = message.content;
-      setResponseMessage(message);
+    for await (const message of sendConversation(model, nextMessages, aiMessage)){
+      responseMessage.content = message.content;
+      if (responseRef) {
+        responseRef.current.innerHTML = marked.parse(message.content)
+        handleScroll(null);
+        scrollToBottom();
+      }
     }
 
-    nextMessages.push(aiMessage);
+    setIsGenerating(false);
+
+    nextMessages[aiMessage.id] = aiMessage;
+    setActiveConversationMessages(nextMessages);
+    const nextConversation = updateConversationMessages(activeConversation, nextMessages);
     setActiveConversation(nextConversation);
-    setResponseMessage(undefined);
-    console.log("done receiving", aiMessage);
   };
 
   
+  const scrollToBottom = () => {
+    if (shouldAutoScroll && messagesEndRef.current) {
+      // messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      messagesEndRef.current.scrollIntoView();
+    }
+  };
   useEffect(() => {
-    const scrollToBottom = () => {
-      if (shouldAutoScroll && messagesEndRef.current) {
-        messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-      }
-    };
-
     scrollToBottom();
-  }, [shouldAutoScroll, messages, responseMessage]);
+  }, [shouldAutoScroll, messages, responseRef, activeConversation]);
 
   const handleScroll = (e) => {
     const container = containerRef.current;
@@ -74,15 +80,17 @@ const ChatPanel: FC<Props> = ({ }) => {
   return (
     <React.Fragment>
       <div ref={containerRef} className="grow overflow-y-auto w-full overscroll-contain" onScroll={handleScroll}>
-          {messages.map((message, id) => (
-            <MessageView key={id} id={id.toString()} message={message} />
+          {messages.map((message) => (
+            <MessageView key={message.id} id={message.id.toString()} message={message} />
           ))}
-          {responseMessage?.content.length > 0 ? <MessageView key="response" id="response" message={responseMessage} /> : null}
+          {isGenerating ? 
+            <MessageView key={responseMessage.id} id={responseMessage.id.toString()} message={responseMessage} targetRef={responseRef} />
+          : ""}
           <div ref={messagesEndRef} />
       </div>
       {!shouldAutoScroll && (
         <button 
-          className="fixed bottom-24 left-1/2 btn btn-primary rounded-full"
+          className="fixed bottom-24 left-1/2 btn btn-primary rounded-full icon-inline icon-arrow-down"
           onClick={() => {
             if (containerRef.current) {
               // Add smooth scrolling behavior
@@ -94,10 +102,10 @@ const ChatPanel: FC<Props> = ({ }) => {
             }
           }}
         >
-          ↓
+          <img src="/images/down-arrow-svgrepo-com.svg" width="16" />
         </button>
       )}     
-      <div className="gap-4 flex-none box-border">
+      <div className="gap-4 flex-none box-border mt-3">
         <div className="flex">
           <textarea 
             className="flex-1 input input-bordered input-primary p-2" 

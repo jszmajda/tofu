@@ -34,15 +34,78 @@ export const getAvailableModels = async (): Promise<Model[]> => {
 };
 
 const conversationToMessages = (messages: Message[]): BedrockMessage[] => {
-    return messages.map((message: Message) => ({
+    return messages.map((message) => ({
         role: message.role,
         content: [{ text: message.content }]
-    }));
+    })).filter((message) => {
+      //reject messages where content is less than 1 character
+      return message.content[0].text.length > 0
+    });
+};
+
+export const generateTitle = async (conversation: Conversation, model: Model): Promise<string> => {
+    const creds: AWSCreds = await window.awsCreds.getAwsCreds()
+
+    const client = new BedrockRuntimeClient({
+        region: model.region,
+        credentials: {
+            accessKeyId: creds.AccessKeyId,
+            secretAccessKey: creds.SecretAccessKey,
+            sessionToken: creds.SessionToken,
+        }
+    });
+
+    //convert conversation messages into one string that shows the AI what's in the conversation
+    const conversationString = conversation.messages.map((message) => {
+        return `${message.role}: ${message.content}`;
+    }).join("\n");
+
+    const command = new ConverseStreamCommand({
+        modelId: model.modelId,
+        messages: [
+            {
+                role: "user",
+                content: [
+                    {
+                        text: `The conversation so far has been this:\n\n${conversationString}\n\nRespond ONLY with the title.`
+                    }
+                ]
+            }
+        ],
+        system: [
+            {
+                text: "You are a helpful assistant that generates a short title for a conversation. The title should be no more than 10 words. The title should be a single sentence. "
+            },
+        ],
+        inferenceConfig: { maxTokens: 1024, temperature: 0.1, topP: 0.9 }
+    });
+
+    try {
+        const response = await client.send(command);
+        let title = "";
+        for await (const item of response.stream) {
+            if (item.contentBlockDelta) {
+                const chunk: string = item.contentBlockDelta.delta?.text;
+                console.log(`chunk: ${chunk}`);
+                title += chunk;
+            } else if (item.metadata){
+                // TODO: store this somewhere, record it somewhere..
+                // responseMessage.inputTokens = item.metadata.usage.inputTokens;
+                // responseMessage.outputTokens = item.metadata.usage.outputTokens;
+            }
+
+        }
+        return title;
+    } catch (err) {
+        console.log(`error, can't invoke ${conversation.currentModel.name}, reason: ${err}`);
+        throw err;
+    }
 };
 
 export const sendConversation = async function * (
     model: Model,
-    messages: Message[]
+    messages: Message[],
+    responseMessage: Message
 ): AsyncGenerator<Message, Message, undefined> {
 
     const creds: AWSCreds = await window.awsCreds.getAwsCreds()
@@ -65,19 +128,16 @@ export const sendConversation = async function * (
         inferenceConfig
     })
 
-    const responseMessage: Message = { role: "assistant", content: "" }
-
     try {
         const response = await client.send(command);
         for await (const item of response.stream) {
-        // const test = ["hi ", "there"];
-        // for await (const item of test){
             if (item.contentBlockDelta) {
-            // if (item){
                 const chunk: string = item.contentBlockDelta.delta?.text;
-                // const chunk: string = item;
                 responseMessage.content += chunk;
                 yield responseMessage;
+            } else if (item.metadata){
+                responseMessage.inputTokens = item.metadata.usage.inputTokens;
+                responseMessage.outputTokens = item.metadata.usage.outputTokens;
             }
         }
     } catch (err) {
