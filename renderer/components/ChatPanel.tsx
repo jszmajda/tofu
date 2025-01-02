@@ -107,14 +107,28 @@ const ChatPanel: FC<Props> = ({ }) => {
       )}     
       <div className="gap-4 flex-none box-border mt-3">
         <div className="flex">
-          <textarea 
-            className="flex-1 input input-bordered input-primary p-2" 
-            value={input} 
-            onChange={(e) => setInput(e.target.value)}
+          <div
+            className="flex-1 input input-bordered input-primary p-2 overflow-y-auto whitespace-pre-wrap min-h-[2rem]"
+            style={{ 
+              maxHeight: '50vh',
+              height: 'fit-content',
+              resize: 'none'
+            }}
+            contentEditable={true}
+            role="textbox"
+            onInput={(e) => {
+              setInput(e.currentTarget.textContent || '');
+            }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 sendMessage();
+              }
+            }}
+            // Use ref to access and clear the div
+            ref={(el) => {
+              if (input === '' && el) {
+                el.innerHTML = '';
               }
             }}
           />
