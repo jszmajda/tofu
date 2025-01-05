@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, memo } from "react";
 import { Message } from "../lib/types";
 import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter'
 import nightOwl from "react-syntax-highlighter/dist/cjs/styles/prism/night-owl";
@@ -11,7 +11,7 @@ interface Props {
   targetRef?: React.RefObject<HTMLDivElement>;
 }
 
-const MessageView: FC<Props> = ({ id, message, targetRef }) => {
+const MessageView: FC<Props> = memo(({ id, message, targetRef }) => {
   return (
     <div key={id} className={`chat ${message.role === 'user' ? 'chat-start' : 'chat-end'}`}>
       <div className="chat-header">{message.role} @ <DateFmt date={message.timestamp} format="chat"/></div>
@@ -45,6 +45,6 @@ const MessageView: FC<Props> = ({ id, message, targetRef }) => {
       </div>
     </div>
   )
-}
+})
 
 export default MessageView;
