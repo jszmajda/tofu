@@ -33,7 +33,7 @@ export const getAvailableModels = async (): Promise<Model[]> => {
     ];
 };
 
-const conversationToMessages = (messages: Message[]): BedrockMessage[] => {
+export const conversationToMessages = (messages: Message[]): BedrockMessage[] => {
     return messages.map((message) => ({
         role: message.role,
         content: [{ text: message.content }]
@@ -183,7 +183,7 @@ type GuardrailConverseContentBlock = {
     // Add guardrail content block properties if needed
 };
 
-type BedrockMessage = {
+export type BedrockMessage = {
     role: "user" | "assistant";
     content: ContentBlock[];
 };
