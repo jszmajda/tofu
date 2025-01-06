@@ -11,6 +11,7 @@ const SettingsPage: FC<Props> = ({}) => {
   const [, setConversations] = useAtom(atoms.conversations);
   const [, setActiveConversationMessages] = useAtom(atoms.activeConversationMessages);
   const [, setActiveConversationId] = useAtom(atoms.activeConversationId);
+  const [systemPrompt, setSystemPrompt] = useAtom(atoms.systemPrompt);
 
   useEffect(() => {
     document.querySelector('html').setAttribute('data-theme', theme);
@@ -24,11 +25,11 @@ const SettingsPage: FC<Props> = ({}) => {
   }
 
   return (
-    <div>
+    <div className="p-4">
       <h1 className="text-lg font-bold">Settings</h1>
       <hr/>
 
-      <div className="grid gap-2 mt-4 grid-cols-[30%_70%]">
+      <div className="grid gap-2 mt-4 grid-cols-[30%_70%] p-4">
         <div>Flush Local Storage</div>
         <div><button className="btn btn-secondary btn-sm" onClick={() => { if(confirm("Are you sure?")){ resetStorage() }}}>Flush</button></div>
 
@@ -39,6 +40,11 @@ const SettingsPage: FC<Props> = ({}) => {
               <option className="" key={theme_option} value={theme_option}>{theme_option}</option>
             ))}
           </select>
+        </div>
+
+        <div>System Prompt</div>
+        <div>
+          <textarea className="textarea textarea-bordered w-full" placeholder="System Prompt" onChange={(e) => setSystemPrompt(e.target.value)}>{systemPrompt}</textarea>
         </div>
 
       </div>

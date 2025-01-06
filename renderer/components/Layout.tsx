@@ -1,9 +1,17 @@
 import Head from "next/head";
 import Sidebar from "./Sidebar";
-import { FC, PropsWithChildren } from "react";
+import { FC, PropsWithChildren, useEffect } from "react";
 import React from "react";
+import { useAtom } from "jotai";
+import * as atoms from "../lib/atoms";
 
 const Layout: FC<PropsWithChildren> = ({ children }) => {
+  const [, setHydrated] = useAtom(atoms.isHydrated);
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
+
   return (
     <React.Fragment>
       <Head>

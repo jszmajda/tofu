@@ -23,6 +23,8 @@ const ChatPanel: FC<Props> = ({ }) => {
   const [currentModel, ] = useAtom(atoms.currentModel);
   const [activeConversation, setActiveConversation] = useAtom(atoms.activeConversation);
   const [messages, setActiveConversationMessages]: [Message[], any] = useAtom(atoms.activeConversationMessages);
+  const [systemPrompt, ] = useAtom(atoms.systemPrompt);
+
   const [isGenerating, setIsGenerating] = useState(false);
   const responseMessage: Message = {id: -1, role: "assistant", content: "", timestamp: new Date(), modelId: currentModel.modelId}
 
@@ -39,7 +41,7 @@ const ChatPanel: FC<Props> = ({ }) => {
 
     // setMessages(nextMessages);
 
-    for await (const message of sendConversation(model, nextMessages, aiMessage)){
+    for await (const message of sendConversation(model, systemPrompt, nextMessages, aiMessage)){
       responseMessage.content = message.content;
       if (responseRef) {
         responseRef.current.innerHTML = marked.parse(message.content)
@@ -63,9 +65,16 @@ const ChatPanel: FC<Props> = ({ }) => {
       messagesEndRef.current.scrollIntoView();
     }
   };
+
+  // scroll to bottom on message updates
   useEffect(() => {
     scrollToBottom();
   }, [shouldAutoScroll, messages, responseRef, activeConversation]);
+
+  // scroll to bottom on load
+  useEffect(() => {
+    scrollToBottom();
+  }, []);
 
   const handleScroll = (e) => {
     const container = containerRef.current;

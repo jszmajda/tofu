@@ -1,4 +1,4 @@
-import { BedrockRuntimeClient, ConverseStreamCommand } from "@aws-sdk/client-bedrock-runtime";
+import { BedrockRuntimeClient, ConverseStreamCommand, ConverseStreamCommandInput } from "@aws-sdk/client-bedrock-runtime";
 import { AWSCreds, Conversation, Message, Model } from "./types";
 
 declare global {
@@ -104,6 +104,7 @@ export const generateTitle = async (conversation: Conversation, model: Model): P
 
 export const sendConversation = async function * (
     model: Model,
+    systemPrompt: string,
     messages: Message[],
     responseMessage: Message
 ): AsyncGenerator<Message, Message, undefined> {
@@ -120,13 +121,17 @@ export const sendConversation = async function * (
     });
     const inferenceConfig = { maxTokens: 4096, temperature: 0.1, topP: 0.9 };
 
-    const command = new ConverseStreamCommand({
+    let commandOptions: ConverseStreamCommandInput = {
         modelId: model.modelId,
         // eslint-disable-next-line
         // @ts-ignore
         messages: conversationToMessages(messages), //eslint-disable-line
         inferenceConfig
-    })
+    }
+    if(systemPrompt !== null && systemPrompt.length > 0){
+      commandOptions['system'] = [{text: systemPrompt}];
+    }
+    const command = new ConverseStreamCommand(commandOptions);
 
     try {
         const response = await client.send(command);
