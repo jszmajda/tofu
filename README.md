@@ -30,7 +30,7 @@ Prerequisites:
 Steps:
 1. Clone the repository
 2. Run `npm install` to install dependencies
-3. Create a `.aws/credentials` file in your home directory with your AWS credentials:
+3. Ensure you have the AWS CLI setup such that `aws configure export-credentials` returns a JSON with `AccessKeyId` and `SecretAccessKey` - this is how Tofu will talk with AWS Bedrock. You can set this up by following [this guide](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-quickstart.html), or by running `aws configure`. Alternately, you can ensure you have a file `~/.aws/credentials` with the following data in it:
    ```
    aws_access_key_id=YOUR_ACCESS_KEY
    aws_secret_access_key=YOUR_SECRET_KEY
@@ -52,7 +52,7 @@ npm run build
 
 ### Configuration
 
-The application reads AWS credentials from the `.aws/credentials` file in your home directory. Ensure this file is properly configured with your AWS access key and secret key.
+The application reads AWS credentials from either the AWS CLI (using `aws configure export-credentials`), or the `.aws/credentials` file in your home directory. Ensure this file is properly configured with your AWS access key and secret key.
 
 ### Common Use Cases
 
