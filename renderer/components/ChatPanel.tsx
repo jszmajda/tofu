@@ -8,6 +8,7 @@ import * as atoms from '../lib/atoms';
 import { useAtom } from 'jotai';
 import { buildNewMessage, updateConversationMessages } from '../lib/conversation_tools';
 import { marked } from 'marked';
+import NoSSR from './NoSSR';
 
 interface Props {
 }
@@ -95,7 +96,8 @@ const ChatPanel: FC<Props> = ({ }) => {
   };
 
   return (
-    <React.Fragment>
+    <NoSSR>
+
       <div ref={containerRef} className="grow overflow-y-auto w-full overscroll-contain" onScroll={handleScroll}>
           {messages.map((message) => (
             <MessageView key={message.id} id={message.id.toString()} message={message} />
@@ -119,7 +121,7 @@ const ChatPanel: FC<Props> = ({ }) => {
             }
           }}
         >
-          <img src="/images/down-arrow-svgrepo-com.svg" width="16" />
+          <svg className="stroke-primary-content" width="16" height="16" viewBox="0 0 330 330"><path d="M254 234c-2-5-8-9-14-9h-60V15a15 15 0 0 0-30 0v210H90a15 15 0 0 0-11 26l75 75a15 15 0 0 0 22 0l75-75c4-5 5-11 3-17zm-89 60-39-39h78l-39 39z"/></svg>
         </button>
       )}     
       <div className="gap-4 flex-none box-border mt-3">
@@ -153,7 +155,7 @@ const ChatPanel: FC<Props> = ({ }) => {
         </div>
       </div>
 
-    </React.Fragment>
+    </NoSSR>
   );
 };
 

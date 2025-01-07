@@ -9,13 +9,13 @@ interface Props {
 const ModelSelector: FC<Props> = ({ }) => {
 
   const [models, ]: [Model[], any] = useAtom(atoms.availableModels);
-  const [, setModel] = useAtom(atoms.currentModel);
+  const [currentModel, setCurrentModel] = useAtom(atoms.currentModel);
   const [activeConversation, setActiveConversation] = useAtom(atoms.activeConversation)
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const model = models.find((model) => model.modelId === event.target.value);
     if (model){
-      setModel(model);
+      setCurrentModel(model);
       if(activeConversation && activeConversation.currentModel != model){
         setActiveConversation({...activeConversation, currentModel: model});
       }
@@ -23,7 +23,7 @@ const ModelSelector: FC<Props> = ({ }) => {
   };
 
   return (
-    <select onChange={handleChange} className="select select-ghost">
+    <select onChange={handleChange} value={currentModel?.modelId} className="select select-ghost">
       {models.map((model) => (
         <option key={model.modelId} value={model.modelId}>
           {model.name}

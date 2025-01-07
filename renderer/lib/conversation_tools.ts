@@ -79,7 +79,6 @@ export const costOfConversation = (conversation: Conversation, availableModels: 
   const cost = conversation?.messages.reduce((acc, message) => {
     const model = availableModels.find(m => m.modelId === message.modelId);
     if (model) {
-      console.log(`model ${model.name} for ${message.inputTokens} and ${message.outputTokens}`);
       const inputCost = (message.inputTokens || 0) * (model.costPerInputTokenK / 1000);
       const outputCost = (message.outputTokens || 0) * (model.costPerOutputTokenK / 1000);
       return acc + inputCost + outputCost;
@@ -87,6 +86,5 @@ export const costOfConversation = (conversation: Conversation, availableModels: 
       return acc;
     }
   }, 0) || 0; 
-  console.log(`cost of ${conversation?.title} is ${cost}`);
   return cost;
 }

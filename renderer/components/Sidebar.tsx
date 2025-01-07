@@ -7,6 +7,7 @@ import { newConversation } from "../pages/actions";
 import { buildDefaultConversation } from "../lib/conversation_tools";
 import { useRouter } from "next/router";
 import DateFmt from "./DateFmt";
+import NoSSR from "./NoSSR";
 
 interface Props {
 };
@@ -45,21 +46,22 @@ const Sidebar: FC<Props> = ({ }) => {
           <h3 className="menu-title">Conversations</h3>
         </li>
       </ul>
-      <div className="overflow-y-scroll">
-        <ul className="menu menu-xs">
-          {Object.keys(conversations).map((conv_id) => (
-            <li key={conv_id}>
-              <Link href={`/conversation/${conv_id}`} className="block hover:bg-gray-700 p-2 rounded">
-                <div className="flex flex-col border-l-2 border-l-gray-500 pl-2">
-                  <DateFmt date={conversations[conv_id].lastMessageDate} className="text-2xs text-gray-600" />
-                  <div>{conversations[conv_id].title}</div>
-                </div> 
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
+      <NoSSR>
+        <div className="overflow-y-scroll">
+          <ul className="menu menu-xs">
+            {Object.keys(conversations).map((conv_id) => (
+              <li key={conv_id}>
+                <Link href={`/conversation/${conv_id}`} className="block hover:bg-gray-700 p-2 rounded">
+                  <div className="flex flex-col border-l-2 border-l-gray-500 pl-2">
+                    <DateFmt date={conversations[conv_id].lastMessageDate} className="text-2xs text-gray-600" />
+                    <div>{conversations[conv_id].title}</div>
+                  </div> 
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </NoSSR>    </div>
   );
 }
 export default Sidebar;

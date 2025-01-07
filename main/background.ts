@@ -86,8 +86,6 @@ if (isProd) {
 
   //use nativeTheme to detect dark mode
   nativeTheme.on('updated', () => {
-    console.log('dark mode updated')
-    console.log(nativeTheme.themeSource)
     //send message to renderer to update dark mode
     mainWindow.webContents.send('dark-mode-updated', nativeTheme.shouldUseDarkColors)
   })
