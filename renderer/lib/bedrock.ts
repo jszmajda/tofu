@@ -14,21 +14,24 @@ export const getAvailableModels = async (): Promise<Model[]> => {
             modelId: "anthropic.claude-3-5-haiku-20241022-v1:0",
             costPerInputTokenK: 0.0008,
             costPerOutputTokenK: 0.004,
-            region: 'us-west-2'
+            region: 'us-west-2',
+            maxContextTokens: 200000
         },
         {
             name: "Claude 3.5 Sonnet v1",
             modelId: "anthropic.claude-3-5-sonnet-20240620-v1:0",
             costPerInputTokenK: 0.003,
             costPerOutputTokenK: 0.015,
-            region: 'us-east-1'
+            region: 'us-east-1',
+            maxContextTokens: 200000
         },
         {
             name: "Claude 3.5 Sonnet v2",
             modelId: "anthropic.claude-3-5-sonnet-20241022-v2:0",
             costPerInputTokenK: 0.003,
             costPerOutputTokenK: 0.015,
-            region: 'us-west-2'
+            region: 'us-west-2',
+            maxContextTokens: 200000
         }
     ];
 };

@@ -14,7 +14,9 @@ interface Props {
 const MessageView: FC<Props> = memo(({ id, message, targetRef }) => {
   return (
     <div key={id} className={`chat ${message.role === 'user' ? 'chat-start' : 'chat-end'}`}>
-      <div className="chat-header">{message.role} @ <DateFmt date={message.timestamp} format="chat"/></div>
+      <div className="chat-header">
+        {message.role === 'user' ? 'user' : message.modelName || 'assistant'} @ <DateFmt date={message.timestamp} format="chat"/>
+      </div>
       <div className={`text-sm prose chat-bubble bg-base-100 ring-2 ring-inset p-5 text-base-content marker:text-base-content ${message.role === 'user' ? 'ring-info' : 'ring-accent'}`} ref={targetRef}>
         <ReactMarkdown
           children={message.content}
@@ -43,6 +45,11 @@ const MessageView: FC<Props> = memo(({ id, message, targetRef }) => {
           }}
            />
       </div>
+      { message.role === 'assistant' && message.inputTokens && message.outputTokens && (
+        <div className="chat-footer opacity-50" title="Input and Output tokens used">
+          I: {message.inputTokens} O: {message.outputTokens}
+        </div>
+      ) }
     </div>
   )
 })

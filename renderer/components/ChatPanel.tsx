@@ -26,7 +26,15 @@ const ChatPanel: FC<Props> = ({ }) => {
   const [systemPrompt, ] = useAtom(atoms.systemPrompt);
 
   const [isGenerating, setIsGenerating] = useState(false);
-  const responseMessage: Message = {id: -1, role: "assistant", content: "", timestamp: new Date(), modelId: currentModel.modelId}
+
+  const responseMessage: Message = {
+    id: -1,
+    role: "assistant",
+    content: "",
+    timestamp: new Date(),
+    modelId: currentModel.modelId, 
+    modelName: currentModel.name,
+  }
 
   const sendMessage = async () => {
     setIsGenerating(true);

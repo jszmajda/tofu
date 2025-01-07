@@ -1,6 +1,6 @@
 'use client';
 import { useAtom } from "jotai";
-import { FC, useEffect, useMemo, useState } from "react";
+import { act, FC, useEffect, useMemo, useState } from "react";
 import * as atoms from '../../lib/atoms';
 import ModelSelector from "../../components/ModelSelector";
 import ChatPanel from "../../components/ChatPanel";
@@ -8,7 +8,7 @@ import { useRouter } from "next/router";
 import React from "react";
 import { generateTitle } from "../../lib/bedrock";
 import DateFmt from "../../components/DateFmt";
-import { costOfConversation } from "../../lib/conversation_tools";
+import { costOfConversation, maxTokensUsed, totalTokensUsed, usedContextWindow } from "../../lib/conversation_tools";
 
 interface Props {
 
@@ -48,6 +48,20 @@ const ConversationPage: FC<Props> = () => {
     setActiveConversationMessages([]);
     setActiveConversationId("");
     setConversations(nextConversations);
+  }
+  
+  const friendlyNumber = (num: number) => {
+    // if it's less than 1000, return the number, otherwise show XXk
+    if (num < 1000) {
+      return num;
+    } else {
+      return `${(num / 1000).toFixed(1)}k`;
+    }
+  }
+
+  const friendlyDecimal = (num: number) => {
+    // round a decimal to the nearest tenth
+    return Math.round(num * 10) / 10;
   }
 
   return (
@@ -108,6 +122,8 @@ const ConversationPage: FC<Props> = () => {
               : <img src="/images/spinner.svg" width={24}/> }
             </div>
             <div className="flex flex-row items-center">
+              {/* show total tokens used */}
+              <span className="mr-2 opacity-50">{friendlyNumber(totalTokensUsed(activeConversation))} tok ({friendlyDecimal(usedContextWindow(activeConversation, model))}%)</span>
               {/* show total cost of conversation */}
               <span className="mr-2">${conversationCost.toFixed(2)}</span>
               <button className="btn btn-secondary btn-sm" onClick={() => { if(confirm("Are you sure?")){ deleteConversation(activeConversationId); router.push("/home") }}}>

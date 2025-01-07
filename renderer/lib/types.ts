@@ -6,6 +6,7 @@ export type Message = {
   outputTokens?: number;
   timestamp: Date;
   modelId: string;
+  modelName: string;
 };
 
 export interface ConversationSet {
@@ -28,6 +29,7 @@ export type Model = {
   costPerInputTokenK: number;
   costPerOutputTokenK: number;
   region: string;
+  maxContextTokens: number;
 };
 
 export type AppState = {
