@@ -25,6 +25,7 @@ const ConversationPage: FC<Props> = () => {
   const [, setActiveConversationMessages] = useAtom(atoms.activeConversationMessages);
   const [model,] = useAtom(atoms.currentModel);
   const [availableModels, ] = useAtom(atoms.availableModels);
+  const [isConfirming, setIsConfirming] = useState(false);
 
   useEffect(() => {
     // on navigation, set the active conversation id to the routed id
@@ -126,8 +127,24 @@ const ConversationPage: FC<Props> = () => {
               <span className="mr-2 opacity-50">{friendlyNumber(totalTokensUsed(activeConversation))} tok ({friendlyDecimal(usedContextWindow(activeConversation, model))}%)</span>
               {/* show total cost of conversation */}
               <span className="mr-2">${conversationCost.toFixed(2)}</span>
-              <button className="btn btn-secondary btn-sm" onClick={() => { if(confirm("Are you sure?")){ deleteConversation(activeConversationId); router.push("/home") }}}>
-                <img src="/images/trash-svgrepo-com.svg" className="w-4 h-4" />
+              {/* Two-step delete button that changes icon on first click */}
+              <button 
+                className="btn btn-secondary btn-sm"
+                onClick={(e) => {
+                  if (!isConfirming) {
+                    setIsConfirming(true);
+                    // Reset confirmation state after delay
+                    setTimeout(() => setIsConfirming(false), 1200);
+                  } else {
+                    deleteConversation(activeConversationId);
+                    router.push("/home");
+                  }
+                }}>
+                <img 
+                  src={isConfirming ? '/images/question-mark-svgrepo-com.svg' : '/images/trash-svgrepo-com.svg'}
+                  className="w-4 h-4 transition-opacity duration-200 ease-in-out"
+                  alt={isConfirming ? "Confirm delete" : "Delete"}
+                />
               </button>
             </div>
           </div>
