@@ -1,6 +1,11 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron'
 import { AWSCreds } from '../renderer/lib/types'
 
+contextBridge.exposeInMainWorld('themeData', {
+  onUpdateDarkMode: (callback) => ipcRenderer.on('dark-mode-updated', (_event, value) => callback(value)),
+  // query main thread to see if nativeTheme is dark
+  getIsDarkMode: () => ipcRenderer.invoke('getIsDarkMode')
+});
 
 // when ipc receives an awsCreds message, set the object received to be exposed in the main world
 contextBridge.exposeInMainWorld('awsCreds', {

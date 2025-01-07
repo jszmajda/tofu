@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import { app, ipcMain } from 'electron'
+import { app, ipcMain, nativeTheme } from 'electron'
 import serve from 'electron-serve'
 import { createWindow } from './helpers'
 import { AWSCreds } from '../renderer/lib/types'
@@ -83,6 +83,16 @@ if (isProd) {
     await mainWindow.loadURL(`http://localhost:${port}/home`)
     // mainWindow.webContents.openDevTools()
   }
+
+  //use nativeTheme to detect dark mode
+  nativeTheme.on('updated', () => {
+    console.log('dark mode updated')
+    console.log(nativeTheme.themeSource)
+    //send message to renderer to update dark mode
+    mainWindow.webContents.send('dark-mode-updated', nativeTheme.shouldUseDarkColors)
+  })
+  ipcMain.handle('getIsDarkMode', () => nativeTheme.shouldUseDarkColors)
+
 })()
 
 app.on('window-all-closed', () => {

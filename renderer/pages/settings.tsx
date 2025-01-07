@@ -8,14 +8,11 @@ interface Props {
 
 const SettingsPage: FC<Props> = ({}) => {
   const [theme, setTheme] = useAtom(atoms.theme);
+  const [darkModeTheme, setDarkModeTheme] = useAtom(atoms.darkModeTheme);
   const [, setConversations] = useAtom(atoms.conversations);
   const [, setActiveConversationMessages] = useAtom(atoms.activeConversationMessages);
   const [, setActiveConversationId] = useAtom(atoms.activeConversationId);
   const [systemPrompt, setSystemPrompt] = useAtom(atoms.systemPrompt);
-
-  useEffect(() => {
-    document.querySelector('html').setAttribute('data-theme', theme);
-  }, [theme])
 
   const resetStorage = () => {
     localStorage.clear();
@@ -33,9 +30,18 @@ const SettingsPage: FC<Props> = ({}) => {
         <div>Flush Local Storage</div>
         <div><button className="btn btn-secondary btn-sm" onClick={() => { if(confirm("Are you sure?")){ resetStorage() }}}>Flush</button></div>
 
-        <div>Change Theme</div>
+        <div>Light Mode Theme</div>
         <div>
           <select className="select select-bordered w-full max-w-xs theme-controller" value={theme} onChange={(ev) => setTheme(ev.target.value)}>
+            {themes.map((theme_option) => (
+              <option className="" key={theme_option} value={theme_option}>{theme_option}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>Dark Mode Theme</div>
+        <div>
+          <select className="select select-bordered w-full max-w-xs theme-controller" value={darkModeTheme} onChange={(ev) => setDarkModeTheme(ev.target.value)}>
             {themes.map((theme_option) => (
               <option className="" key={theme_option} value={theme_option}>{theme_option}</option>
             ))}

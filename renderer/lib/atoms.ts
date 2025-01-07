@@ -13,6 +13,8 @@ const clientAtom = <T>(key: string, initialValue: T) => {
 export const isHydrated = atom<boolean>(false);
 
 export const theme = clientAtom<string>('theme', 'cupcake');
+export const darkModeTheme = clientAtom<string>('theme-dark', 'forest');
+export const isDarkMode = atom<boolean>(false);
 
 export const availableModels = atomWithLazy<Promise<Model[]>>(async () => {
   return await getAvailableModels();
