@@ -4,6 +4,8 @@ import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter'
 import nightOwl from "react-syntax-highlighter/dist/cjs/styles/prism/night-owl";
 import ReactMarkdown from 'react-markdown';
 import DateFmt from "./DateFmt";
+import * as atoms from "../lib/atoms";
+import { useAtom } from "jotai";
 
 interface Props {
   id: string;
@@ -12,10 +14,11 @@ interface Props {
 }
 
 const MessageView: FC<Props> = memo(({ id, message, targetRef }) => {
+  const [userName, ] = useAtom(atoms.userName);
   return (
     <div key={id} className={`chat ${message.role === 'user' ? 'chat-start' : 'chat-end'}`}>
       <div className="chat-header">
-        {message.role === 'user' ? 'user' : message.modelName || 'assistant'} @ <DateFmt date={message.timestamp} format="chat"/>
+        {message.role === 'user' ? userName : message.modelName || 'assistant'} @ <DateFmt date={message.timestamp} format="chat"/>
       </div>
       <div className={`text-sm prose chat-bubble bg-base-100 ring-2 ring-inset p-5 text-base-content marker:text-base-content ${message.role === 'user' ? 'ring-info' : 'ring-accent'}`} ref={targetRef}>
         <ReactMarkdown

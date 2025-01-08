@@ -10,12 +10,15 @@ const clientAtom = <T>(key: string, initialValue: T) => {
   return atomWithStorage<T>(key, initialValue);
 };
 
+// utility to help detect hydration state
 export const isHydrated = atom<boolean>(false);
 
+// theme-related atoms
 export const theme = clientAtom<string>('theme', 'cupcake');
 export const darkModeTheme = clientAtom<string>('theme-dark', 'forest');
 export const isDarkMode = atom<boolean>(false);
 
+// models and stuff
 export const availableModels = atomWithLazy<Promise<Model[]>>(async () => {
   return await getAvailableModels();
 });
@@ -37,6 +40,7 @@ export const currentModel = atom<Model>(
   }
 );
 
+// conversations and stuff
 export const conversations = clientAtom<ConversationSet>('conversations', {});
 export const activeConversationId = atom<string>("");
 export const activeConversation = atom<Conversation>(
@@ -59,4 +63,8 @@ export const activeConversation = atom<Conversation>(
 
 export const activeConversationMessages = atom<Message[]>([])
 
+// system prompt
 export const systemPrompt = clientAtom<string>("system-prompt", "You are a helpful assistant named Tofu.");
+
+// user stuff
+export const userName = clientAtom<string>("userName", "User");

@@ -14,6 +14,7 @@ const SettingsPage: FC<Props> = ({}) => {
   const [, setActiveConversationMessages] = useAtom(atoms.activeConversationMessages);
   const [, setActiveConversationId] = useAtom(atoms.activeConversationId);
   const [systemPrompt, setSystemPrompt] = useAtom(atoms.systemPrompt);
+  const [userName, setUserName] = useAtom(atoms.userName);
 
   const resetStorage = () => {
     localStorage.clear();
@@ -30,6 +31,11 @@ const SettingsPage: FC<Props> = ({}) => {
       <NoSSR>
 
         <div className="grid gap-2 mt-4 grid-cols-[30%_70%] p-4">
+
+          <div>User Name</div>
+          <div>
+            <input type="text" placeholder="User Name" className="input input-bordered w-full max-w-xs" value={userName} onChange={(e) => setUserName(e.target.value)} />
+          </div>
 
           <div>Light Mode Theme</div>
           <div>
