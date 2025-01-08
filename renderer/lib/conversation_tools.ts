@@ -3,16 +3,12 @@ import { Conversation, Message, Model } from "./types";
 export const buildDefaultConversation = (): Conversation => {
   const now = new Date();
   const id = now.toISOString();
+  const friendlyDate = now.toLocaleDateString("en-US", { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
   return {
-    messages: [
-      // { role: 'user', content: 'test' },
-      // { role: 'assistant', content: 'Hello! I\'m ready to help you. What would you like to do?' },
-      // { role: 'user', content: 'write a limmerick?' },
-      // { role: 'assistant', content: 'Here\'s a limerick for you:\n\nThere once was a cat from Nantucket\nWho carried his lunch in a bucket\n  He meowed with delight\n  At his fishy bite\nAnd said, "This meal\'s simply untrucked!"\n\nWould you like me to write another one?' }
-    ],
+    messages: [],
     totalCost: 0,
     id: id,
-    title: id,
+    title: friendlyDate,
     currentModel: null,
     firstMessageDate: now,
     lastMessageDate: now
