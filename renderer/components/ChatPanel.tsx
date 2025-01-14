@@ -15,8 +15,8 @@ interface Props {
 
 const ChatPanel: FC<Props> = ({ }) => {
   const [input, setInput] = useState('');
-  // const [responseMessage, setResponseMessage] = useState(initialMessage);
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const messagesEndRef = useRef(null);
   const containerRef = useRef(null);
   const responseRef = useRef(null);
@@ -47,32 +47,51 @@ const ChatPanel: FC<Props> = ({ }) => {
 
   const sendMessage = async () => {
     setIsGenerating(true);
+    setErrorMessage(null);
+    const originalInput = input;
     const nextMessages: Message[] = [...messages];
     const userMessage: Message = buildNewMessage(nextMessages, 'user', input, currentModel);
-    nextMessages[userMessage.id] = userMessage;
-    setActiveConversationMessages(nextMessages);
-
-    const aiMessage: Message = buildNewMessage(nextMessages, 'assistant', '', currentModel);
     const model = activeConversation.currentModel || currentModel;
     setInput('');
 
-    // setMessages(nextMessages);
+    // Add user message immediately
+    nextMessages[userMessage.id] = userMessage;
+    setActiveConversationMessages([...nextMessages]); // Create new array to trigger re-render
+    const nextConversationWithUser = updateConversationMessages(activeConversation, nextMessages);
+    setActiveConversation(nextConversationWithUser);
 
-    for await (const message of sendConversation(model, systemPrompt, nextMessages, aiMessage)){
-      responseMessage.content = message.content;
-      if (responseRef) {
-        responseRef.current.innerHTML = marked.parse(message.content)
-        handleScroll(null);
-        scrollToBottom();
+    try {
+      const aiMessage: Message = buildNewMessage(nextMessages, 'assistant', '', currentModel);
+      for await (const message of sendConversation(model, systemPrompt, nextMessages, aiMessage)){
+        responseMessage.content = message.content;
+        if (responseRef) {
+          responseRef.current.innerHTML = marked.parse(message.content)
+          handleScroll(null);
+          scrollToBottom();
+        }
       }
+
+      nextMessages[aiMessage.id] = aiMessage;
+      setActiveConversationMessages(nextMessages);
+      const nextConversation = updateConversationMessages(activeConversation, nextMessages);
+      setActiveConversation(nextConversation);
+    } catch (error) {
+      // Remove the user message from the conversation
+      const messagesWithoutUser = nextMessages.slice(0, -1);
+      setActiveConversationMessages(messagesWithoutUser);
+      const nextConversationWithoutUser = updateConversationMessages(activeConversation, messagesWithoutUser);
+      setActiveConversation(nextConversationWithoutUser);
+      
+      // Restore the original input
+      setInput(originalInput);
+      if (inputRef.current) {
+        inputRef.current.textContent = originalInput;
+      }
+      // Set error message to be displayed
+      setErrorMessage(`Error: ${error.message}`);
+    } finally {
+      setIsGenerating(false);
     }
-
-    setIsGenerating(false);
-
-    nextMessages[aiMessage.id] = aiMessage;
-    setActiveConversationMessages(nextMessages);
-    const nextConversation = updateConversationMessages(activeConversation, nextMessages);
-    setActiveConversation(nextConversation);
   };
 
   
@@ -152,6 +171,12 @@ const ChatPanel: FC<Props> = ({ }) => {
         </button>
       )}     
       <div className="gap-4 flex-none box-border mt-3">
+        {errorMessage && (
+          <div className="alert alert-error mb-2">
+            <span>{errorMessage}</span>
+            <button className="btn btn-ghost btn-xs" onClick={() => setErrorMessage(null)}>Dismiss</button>
+          </div>
+        )}
         <div className="flex">
           <div
             className="flex-1 input input-primary py-2 overflow-y-auto whitespace-pre-wrap min-h-[3rem] rounded-r-none rounded-bl-none focus:-outline-offset-2"
