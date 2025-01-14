@@ -20,6 +20,8 @@ const ChatPanel: FC<Props> = ({ }) => {
   const messagesEndRef = useRef(null);
   const containerRef = useRef(null);
   const responseRef = useRef(null);
+  const inputRef = useRef<HTMLDivElement>(null);
+
 
   const [currentModel, ] = useAtom(atoms.currentModel);
   const [activeConversation, setActiveConversation] = useAtom(atoms.activeConversation);
@@ -27,6 +29,12 @@ const ChatPanel: FC<Props> = ({ }) => {
   const [systemPrompt, ] = useAtom(atoms.systemPrompt);
 
   const [isGenerating, setIsGenerating] = useState(false);
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [activeConversation]);
 
   const responseMessage: Message = {
     id: -1,
@@ -146,7 +154,7 @@ const ChatPanel: FC<Props> = ({ }) => {
       <div className="gap-4 flex-none box-border mt-3">
         <div className="flex">
           <div
-            className="flex-1 input input-bordered input-primary p-2 overflow-y-auto whitespace-pre-wrap min-h-[2rem]"
+            className="flex-1 input input-primary py-2 overflow-y-auto whitespace-pre-wrap min-h-[3rem] rounded-r-none rounded-bl-none focus:-outline-offset-2"
             style={{ 
               maxHeight: '50vh',
               height: 'fit-content',
@@ -165,12 +173,13 @@ const ChatPanel: FC<Props> = ({ }) => {
             }}
             // Use ref to access and clear the div
             ref={(el) => {
+              inputRef.current = el;
               if (input === '' && el) {
                 el.innerHTML = '';
               }
             }}
           />
-          <button className="py-2 px-4 btn btn-primary" onClick={sendMessage}>Send</button>
+          <button className="py-2 px-4 btn btn-primary rounded-l-none" onClick={sendMessage}>Send</button>
         </div>
       </div>
 
