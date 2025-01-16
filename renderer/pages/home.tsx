@@ -20,7 +20,7 @@ const HomePage: FC<Props> = ({ }) => {
   
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-base-100 via-base-200 to-base-300 p-8 text-center">
-      <div className="max-w-xl backdrop-blur-md bg-base-100/15 p-10 rounded-xl shadow-[0_0_50px_rgba(0,0,0,0.25)] border border-base-100/10 hover:border-base-100/20 transition-all duration-500">
+      <div className="max-w-xl backdrop-blur-md bg-base-100 p-10 rounded-xl shadow-[0_0_50px_rgba(0,0,0,0.25)] border border-base-100/10 hover:border-base-100/20 transition-all duration-500">
         <h1 className="text-6xl font-black mb-8 bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary animate-gradient-x">
           Welcome to Tofu
         </h1>

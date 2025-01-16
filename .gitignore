@@ -15,3 +15,5 @@ dist
 .DS_Store
 
 coverage
+bun.lockb
+**/.DS_Store
