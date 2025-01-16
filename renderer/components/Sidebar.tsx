@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { act, FC } from "react";
 import Link from 'next/link'
 import Image from 'next/image'
 import * as atoms from '../lib/atoms';
@@ -17,6 +17,7 @@ const Sidebar: FC<Props> = ({ }) => {
   const [, setActiveConversationId] = useAtom(atoms.activeConversationId);
   const [, setActiveConversationMessages] = useAtom(atoms.activeConversationMessages);
   const router = useRouter();
+  const activeConversationId = router.query.id;
 
   return (
     <div className="h-full overflow-hidden flex flex-col max-w-xs">
@@ -50,8 +51,8 @@ const Sidebar: FC<Props> = ({ }) => {
         <div className="overflow-y-scroll">
           <ul className="menu menu-xs">
             {Object.keys(conversations).map((conv_id) => (
-              <li key={conv_id}>
-                <Link href={`/conversation/${conv_id}`} className="block hover:bg-gray-700 p-2 rounded">
+              <li key={conv_id} className={`rounded ${activeConversationId === conv_id ? "bg-base-300" : ""}`}>
+                <Link href={`/conversation/${conv_id}`} className="block hover:bg-accent p-2 rounded">
                   <div className="flex flex-col border-l-2 border-l-gray-500 pl-2">
                     <DateFmt date={conversations[conv_id].lastMessageDate} className="text-2xs text-gray-600" />
                     <div>{conversations[conv_id].title}</div>
