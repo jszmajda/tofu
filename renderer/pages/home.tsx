@@ -19,32 +19,36 @@ const HomePage: FC<Props> = ({ }) => {
   }
   
   return (
-    <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-      <div className="max-w-xl">
-        <h1 className="text-4xl font-bold mb-6">Welcome to Tofu</h1>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-base-100 via-base-200 to-base-300 p-8 text-center">
+      <div className="max-w-xl backdrop-blur-md bg-base-100/15 p-10 rounded-xl shadow-[0_0_50px_rgba(0,0,0,0.25)] border border-base-100/10 hover:border-base-100/20 transition-all duration-500">
+        <h1 className="text-6xl font-black mb-8 bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary animate-gradient-x">
+          Welcome to Tofu
+        </h1>
         
-        <p className="text-lg mb-8">
+        <p className="text-xl mb-10 leading-relaxed font-light">
           Tofu is your AI companion, ready to help you explore ideas, solve problems, 
           and engage in meaningful conversations across various topics.
         </p>
         
-        <div className="flex justify-center space-x-4 mb-8">
+        <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6 mb-14">
           <button 
             onClick={startNewConversation}
-            className="btn btn-primary btn-lg"
+            className="btn btn-lg btn-primary transform hover:scale-105 transition-all duration-300 shadow-xl hover:shadow-primary/50 animate-pulse-slow"
           >
-            Start New Conversation
+            ✨ Start New Conversation
           </button>
           
-          <Link href="/settings" className="btn btn-secondary btn-lg">
-            Configure Settings
+          <Link href="/settings" className="btn btn-lg btn-secondary transform hover:scale-105 transition-all duration-300 shadow-xl hover:shadow-secondary/50">
+            ⚙️ Configure Settings
           </Link>
         </div>
         
         {Object.keys(conversations).length > 0 && (
-          <div>
-            <h2 className="text-2xl font-semibold mb-4">Recent Conversations</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="animate-fadeIn">
+            <h2 className="text-3xl font-bold mb-8 inline-block border-b-2 border-primary/50 pb-2 bg-gradient-to-r from-primary/80 to-secondary/80 bg-clip-text text-transparent">
+              Recent Conversations
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {Object.values(conversations)
                 .sort((a, b) => new Date(b.lastMessageDate).getTime() - new Date(a.lastMessageDate).getTime())
                 .slice(0, 4)
@@ -52,11 +56,11 @@ const HomePage: FC<Props> = ({ }) => {
                   <Link 
                     key={conversation.id} 
                     href={`/conversation/${conversation.id}`}
-                    className="card bg-base-100 shadow-xl hover:bg-base-200 transition-colors"
+                    className="card glass bg-base-100/30 backdrop-blur-lg shadow-2xl hover:shadow-3xl hover:bg-base-200/40 transition-all duration-500 transform hover:-translate-y-2 hover:scale-105"
                   >
                     <div className="card-body">
-                      <h3 className="card-title">{conversation.title}</h3>
-                      <p className="text-sm text-base-content/70">
+                      <h3 className="card-title text-xl text-primary/90 font-semibold">{conversation.title}</h3>
+                      <p className="text-sm text-base-content/80 font-medium">
                         Last active: {new Date(conversation.lastMessageDate).toLocaleString()}
                       </p>
                     </div>
