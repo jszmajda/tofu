@@ -1,9 +1,8 @@
-import { act, FC } from "react";
+import { FC } from "react";
 import Link from 'next/link'
 import Image from 'next/image'
 import * as atoms from '../lib/atoms';
 import { useAtom } from "jotai";
-import { newConversation } from "../pages/actions";
 import { buildDefaultConversation } from "../lib/conversation_tools";
 import { useRouter } from "next/router";
 import DateFmt from "./DateFmt";

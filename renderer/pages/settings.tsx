@@ -1,4 +1,4 @@
-import { FC, useEffect } from "react";
+import { FC } from "react";
 import themes from "../lib/themes";
 import { useAtom } from "jotai";
 import * as atoms from  "../lib/atoms";

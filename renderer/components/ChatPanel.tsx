@@ -1,6 +1,6 @@
 'use client';
 import { FC, useState, useRef, useEffect } from 'react';
-import { AppState, Conversation, Message } from '../lib/types';
+import { Message } from '../lib/types';
 import { sendConversation } from '../lib/bedrock';
 import MessageView from './MessageView';
 import React from 'react';

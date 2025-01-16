@@ -1,6 +1,6 @@
 'use client';
 import { useAtom } from "jotai";
-import { act, FC, useEffect, useMemo, useState } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import * as atoms from '../../lib/atoms';
 import ModelSelector from "../../components/ModelSelector";
 import ChatPanel from "../../components/ChatPanel";
@@ -8,7 +8,7 @@ import { useRouter } from "next/router";
 import React from "react";
 import { generateTitle } from "../../lib/bedrock";
 import DateFmt from "../../components/DateFmt";
-import { costOfConversation, maxTokensUsed, totalTokensUsed, usedContextWindow } from "../../lib/conversation_tools";
+import { costOfConversation, totalTokensUsed, usedContextWindow } from "../../lib/conversation_tools";
 import { downloadConversationAsJson } from "../../lib/export";
 
 interface Props {

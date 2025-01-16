@@ -1,4 +1,4 @@
-import { act, FC } from 'react';
+import { FC } from 'react';
 import { Model } from '../lib/types';
 import { useAtom } from 'jotai';
 import * as atoms from '../lib/atoms';

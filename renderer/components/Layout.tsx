@@ -4,7 +4,6 @@ import { FC, PropsWithChildren, useEffect } from "react";
 import React from "react";
 import { useAtom } from "jotai";
 import * as atoms from "../lib/atoms";
-import electron from "electron";
 
 declare global {
   interface Window {
