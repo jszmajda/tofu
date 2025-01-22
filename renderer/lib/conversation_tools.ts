@@ -1,9 +1,12 @@
 import { Conversation, Message, Model } from "./types";
 
-export const buildDefaultConversation = (): Conversation => {
+export const buildDefaultConversation = (existingConversations?: { [key: string]: Conversation }): Conversation => {
   const now = new Date();
   const id = now.toISOString();
   const friendlyDate = now.toLocaleDateString("en-US", { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  const maxOrder = existingConversations ? 
+    Math.max(-1, ...Object.values(existingConversations).map(c => c.order ?? -1)) :
+    -1;
   return {
     messages: [],
     totalCost: 0,
@@ -11,7 +14,8 @@ export const buildDefaultConversation = (): Conversation => {
     title: friendlyDate,
     currentModel: null,
     firstMessageDate: now,
-    lastMessageDate: now
+    lastMessageDate: now,
+    order: maxOrder + 1
   }
 }
 

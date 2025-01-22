@@ -21,6 +21,7 @@ export type Conversation = {
   currentModel: Model;
   firstMessageDate: Date;
   lastMessageDate: Date;
+  order: number;
 };
 
 export type Model = {
