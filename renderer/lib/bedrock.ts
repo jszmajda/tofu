@@ -32,14 +32,6 @@ export const getAvailableModels = async (): Promise<Model[]> => {
             costPerOutputTokenK: 0.015,
             region: 'us-west-2',
             maxContextTokens: 200000
-        },
-        {
-            name: "Claude 3.5 Sonnet v2 - error",
-            modelId: "anthropic.claude-3-5-sot-20241022-v2:0",
-            costPerInputTokenK: 0.003,
-            costPerOutputTokenK: 0.015,
-            region: 'us-west-2',
-            maxContextTokens: 200000
         }
     ];
 };

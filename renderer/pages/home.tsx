@@ -4,9 +4,19 @@ import * as atoms from '../lib/atoms';
 import { useRouter } from 'next/router';
 import { buildDefaultConversation } from '../lib/conversation_tools';
 import Link from 'next/link';
+import ReactMarkdown from 'react-markdown';
 
 interface Props {
 }
+
+const setupMessages = `
+
+Note that in order for Tofu to be able to talk with AWS Bedrock, you need to
+have \`aws configure export-credentials\` run correctly. If you run it from the
+console, it should return something like \` { "AccessKeyId": "XXXXXXXXXXXXXXXX",
+"SecretAccessKey": "XXXXXXXXXXXXXXX" } \`
+
+`;
 
 const HomePage: FC<Props> = ({ }) => {
   const [conversations, setConversations] = useAtom(atoms.conversations);
@@ -28,6 +38,10 @@ const HomePage: FC<Props> = ({ }) => {
         <p className="text-xl mb-10 leading-relaxed font-light">
           Tofu is your AI companion, ready to help you explore ideas, solve problems, 
           and engage in meaningful conversations across various topics.
+        </p>
+
+        <p className="prose mb-10 items-start">
+          <ReactMarkdown>{setupMessages}</ReactMarkdown>
         </p>
         
         <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6 mb-14">

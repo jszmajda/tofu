@@ -5,16 +5,19 @@ import serve from 'electron-serve'
 import { createWindow } from './helpers'
 import { AWSCreds } from '../renderer/lib/types'
 import { execSync } from 'child_process';
+import glob from 'fast-glob';
 
 
+/** AWS Credential Loading **/
 const loadCredentials = () => {
   let credentials: AWSCreds = {
     AccessKeyId: undefined,
     SecretAccessKey: undefined
   }
   try {
-    const awsCredentials = execSync('aws configure export-credentials').toString();
+    const awsCredentials = execSync('/usr/bin/env aws configure export-credentials').toString();
     credentials = JSON.parse(awsCredentials);
+    console.log("creds: ", credentials);
   } catch (error) {
     console.log('Could not load AWS credentials:', error);
 
@@ -28,6 +31,9 @@ const loadCredentials = () => {
       }
       return acc
     }, {});
+    credentials['AccessKeyId'] = credentials['aws_access_key_id'];
+    credentials['SecretAccessKey'] = credentials['aws_secret_access_key'];
+    credentials['SessionToken'] = credentials['aws_session_token'];
   }
   return credentials;
 }
@@ -38,6 +44,75 @@ loadCredentials();
 // Handle IPC requests for credential updates
 ipcMain.handle('getAwsCreds', async () => {
   return loadCredentials();
+});
+
+/** Obsidian Vault Loading **/
+
+const findFileForTitle = async (title: string, vaultPath: string) => {
+  const search = path.join(vaultPath, '**', `${title}.md`);
+  try {
+    const files = await glob(search);
+    if (files.length > 0) {
+      return files[0].replace(vaultPath, '');
+    }
+    return null;
+  } catch (error) {
+    console.error('Error finding file:', error);
+    throw error;
+  }
+}
+
+const loadDocument = async (pathAndFilename: string, vaultPath: string) => {
+  if (!pathAndFilename.endsWith('.md')) {
+    pathAndFilename += '.md';
+  }
+  try {
+    const fileContent = fs.readFileSync(path.join(vaultPath, pathAndFilename), { encoding: 'utf8', flag: 'r' });
+    const output: string[] = [];
+    const lines = fileContent.split('\n');
+
+    for (const line of lines) {
+      const trimmedLine = line.trimEnd();
+      
+      if (!/^\s*$/.test(trimmedLine)) {
+        const match = /^--include: \[\[(.*)\]\]$/.exec(trimmedLine);
+
+        if (match) {
+          const matchDocument = match[1];
+          const documentFile = await findFileForTitle(matchDocument, vaultPath);
+          if (documentFile) {
+            output.push(await loadDocument(documentFile, vaultPath));
+          }
+        } else {
+          output.push(trimmedLine);
+        }
+      }
+    }
+
+    return output.join('\n');
+  } catch (error) {
+    console.error('Error loading document:', error);
+    throw error;
+  }
+}
+
+// Handle the IPC calls
+ipcMain.handle('load-document', async (event, { pathAndFilename, vaultPath }) => {
+  try {
+    const content = await loadDocument(pathAndFilename, vaultPath);
+    return { success: true, content };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('find-file', async (event, { title, vaultPath }) => {
+  try {
+    const file = await findFileForTitle(title, vaultPath);
+    return { success: true, file };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
 });
 
 const isProd = process.env.NODE_ENV === 'production'

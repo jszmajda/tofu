@@ -15,6 +15,7 @@ const SettingsPage: FC<Props> = ({}) => {
   const [, setActiveConversationId] = useAtom(atoms.activeConversationId);
   const [systemPrompt, setSystemPrompt] = useAtom(atoms.systemPrompt);
   const [userName, setUserName] = useAtom(atoms.userName);
+  const [obsidianVaultPath, setObsidianVaultPath] = useAtom(atoms.obsidianVaultPath);
 
   const resetStorage = () => {
     localStorage.clear();
@@ -58,6 +59,11 @@ const SettingsPage: FC<Props> = ({}) => {
           <div>System Prompt</div>
           <div>
             <textarea className="textarea textarea-bordered w-full" placeholder="System Prompt" onChange={(e) => setSystemPrompt(e.target.value)}>{systemPrompt}</textarea>
+          </div>
+
+          <div>Obsidian Vault Path</div>
+          <div>
+            <input type="text" placeholder="Obsidian Vault Path" className="input input-bordered w-full max-w-xs" value={obsidianVaultPath} onChange={(e) => setObsidianVaultPath(e.target.value)} />
           </div>
 
           <div className="text-error font-bold">⚠️ Danger Zone</div>

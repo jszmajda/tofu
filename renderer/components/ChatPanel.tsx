@@ -13,6 +13,39 @@ import NoSSR from './NoSSR';
 interface Props {
 }
 
+declare global {
+    interface Window {
+        obsidianAPI?: any
+    }
+}
+
+async function handleLoadDocument(pathAndFilename, vaultPath) {
+  try {
+    const result = await window.obsidianAPI.loadDocument(pathAndFilename, vaultPath);
+    if (result.success) {
+      return result.content;
+    } else {
+      console.error('Error:', result.error);
+    }
+  } catch (error) {
+    console.error('Failed to load document:', error);
+  }
+}
+
+async function handleFindFile(title, vaultPath) {
+  try {
+    const result = await window.obsidianAPI.findFile(title, vaultPath);
+    if (result.success) {
+      return result.file;
+    } else {
+      console.error('Error:', result.error);
+    }
+  } catch (error) {
+    console.error('Failed to find file:', error);
+  }
+}
+
+
 const ChatPanel: FC<Props> = ({ }) => {
   const [input, setInput] = useState('');
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
@@ -30,6 +63,8 @@ const ChatPanel: FC<Props> = ({ }) => {
 
   const [isGenerating, setIsGenerating] = useState(false);
 
+  const [obsidianVaultPath, ] = useAtom(atoms.obsidianVaultPath);
+
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
@@ -45,12 +80,31 @@ const ChatPanel: FC<Props> = ({ }) => {
     modelName: currentModel.name,
   }
 
+  // search message for obsidian path documents to be loaded, indicated by `!!load <filename>`
+  const preProcessMessage = async (message: string): Promise<string> => {
+    if(obsidianVaultPath === null || obsidianVaultPath === undefined){
+      return message;
+    }
+    const regex = /!!load\s+(.+)\s*$/;
+    const match = message.match(regex);
+    if (match) {
+      const filename = match[1];
+      const pathAndFilename = await handleFindFile(filename, obsidianVaultPath);
+      if(pathAndFilename !== null){
+        const content = await handleLoadDocument(pathAndFilename, obsidianVaultPath);
+        message = message.replace(regex, content);
+      }
+    }
+    return message;
+  }
+
   const sendMessage = async () => {
     setIsGenerating(true);
     setErrorMessage(null);
     const originalInput = input;
+    const processedInput = await preProcessMessage(input);
     const nextMessages: Message[] = [...messages];
-    const userMessage: Message = buildNewMessage(nextMessages, 'user', input, currentModel);
+    const userMessage: Message = buildNewMessage(nextMessages, 'user', processedInput, currentModel);
     const model = activeConversation.currentModel || currentModel;
     setInput('');
 

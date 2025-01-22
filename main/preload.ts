@@ -32,4 +32,13 @@ const handler = {
 
 contextBridge.exposeInMainWorld('ipc', handler)
 
+contextBridge.exposeInMainWorld('obsidianAPI', {
+  loadDocument: async (pathAndFilename, vaultPath) => 
+    ipcRenderer.invoke('load-document', { pathAndFilename, vaultPath }),
+  findFile: async (title, vaultPath) =>  {
+    console.log("preload, findFile:", title, vaultPath);
+    return ipcRenderer.invoke('find-file', { title, vaultPath })
+  }
+});
+
 export type IpcHandler = typeof handler

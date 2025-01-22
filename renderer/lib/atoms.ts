@@ -68,3 +68,8 @@ export const systemPrompt = clientAtom<string>("system-prompt", "You are a helpf
 
 // user stuff
 export const userName = clientAtom<string>("userName", "User");
+
+export const obsidianVaultPath = clientAtom<string>("vaultPath", null);
+export const useVault = atom<boolean>((get) => {
+  return get(obsidianVaultPath) !== null;
+});
