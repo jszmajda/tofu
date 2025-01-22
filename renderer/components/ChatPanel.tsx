@@ -47,6 +47,7 @@ async function handleFindFile(title, vaultPath) {
 
 
 const ChatPanel: FC<Props> = ({ }) => {
+  const [unsentMessagesMap, setUnsentMessagesMap] = useAtom(atoms.unsentMessages);
   const [input, setInput] = useState('');
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -54,20 +55,35 @@ const ChatPanel: FC<Props> = ({ }) => {
   const containerRef = useRef(null);
   const responseRef = useRef(null);
   const inputRef = useRef<HTMLDivElement>(null);
-
-
   const [currentModel, ] = useAtom(atoms.currentModel);
   const [activeConversation, setActiveConversation] = useAtom(atoms.activeConversation);
   const [messages, setActiveConversationMessages]: [Message[], any] = useAtom(atoms.activeConversationMessages);
   const [systemPrompt, ] = useAtom(atoms.systemPrompt);
-
   const [isGenerating, setIsGenerating] = useState(false);
-
   const [obsidianVaultPath, ] = useAtom(atoms.obsidianVaultPath);
 
+  // Load unsent message when conversation changes
   useEffect(() => {
+    if (activeConversation?.id && unsentMessagesMap[activeConversation.id]) {
+      setInput(unsentMessagesMap[activeConversation.id]);
+      if (inputRef.current) {
+        inputRef.current.textContent = unsentMessagesMap[activeConversation.id];
+      }
+    } else {
+      setInput('');
+      if (inputRef.current) {
+        inputRef.current.textContent = '';
+      }
+    }
     if (inputRef.current) {
       inputRef.current.focus();
+      // Set cursor to end of content
+      const range = document.createRange();
+      const selection = window.getSelection();
+      range.selectNodeContents(inputRef.current);
+      range.collapse(false);
+      selection.removeAllRanges();
+      selection.addRange(range);
     }
   }, [activeConversation]);
 
@@ -85,17 +101,21 @@ const ChatPanel: FC<Props> = ({ }) => {
     if(obsidianVaultPath === null || obsidianVaultPath === undefined){
       return message;
     }
-    const regex = /!!load\s+(.+)\s*$/;
-    const match = message.match(regex);
-    if (match) {
+      // Match !!load followed by text until either a newline or closing tag
+    const regex = /!!load\s+([^<>\n]+?)(?=\s*$|\s*<|[\n])/g;
+    let processedMessage = message;
+    let match;
+
+    while ((match = regex.exec(message)) !== null) {
       const filename = match[1];
       const pathAndFilename = await handleFindFile(filename, obsidianVaultPath);
-      if(pathAndFilename !== null){
+      if (pathAndFilename !== null) {
         const content = await handleLoadDocument(pathAndFilename, obsidianVaultPath);
-        message = message.replace(regex, content);
+        processedMessage = processedMessage.replace(match[0], content);
       }
     }
-    return message;
+
+    return processedMessage;
   }
 
   const sendMessage = async () => {
@@ -106,7 +126,11 @@ const ChatPanel: FC<Props> = ({ }) => {
     const nextMessages: Message[] = [...messages];
     const userMessage: Message = buildNewMessage(nextMessages, 'user', processedInput, currentModel);
     const model = activeConversation.currentModel || currentModel;
+    // Clear input and unsent message storage
     setInput('');
+    const nextUnsentMessages = { ...unsentMessagesMap };
+    delete nextUnsentMessages[activeConversation.id];
+    setUnsentMessagesMap(nextUnsentMessages);
 
     // Add user message immediately
     nextMessages[userMessage.id] = userMessage;
@@ -242,7 +266,15 @@ const ChatPanel: FC<Props> = ({ }) => {
             contentEditable={true}
             role="textbox"
             onInput={(e) => {
-              setInput(e.currentTarget.textContent || '');
+              const newInput = e.currentTarget.textContent || '';
+              setInput(newInput);
+              // Save unsent message for this conversation
+              if (activeConversation?.id) {
+                setUnsentMessagesMap({
+                  ...unsentMessagesMap,
+                  [activeConversation.id]: newInput
+                });
+              }
             }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {

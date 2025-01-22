@@ -18,6 +18,9 @@ export const theme = clientAtom<string>('theme', 'cupcake');
 export const darkModeTheme = clientAtom<string>('theme-dark', 'forest');
 export const isDarkMode = atom<boolean>(false);
 
+// conversation state atoms
+export const unsentMessages = clientAtom<{ [conversationId: string]: string }>('unsentMessages', {});
+
 // models and stuff
 export const availableModels = atomWithLazy<Promise<Model[]>>(async () => {
   return await getAvailableModels();
