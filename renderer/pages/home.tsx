@@ -12,8 +12,8 @@ interface Props {
 const setupMessages = `
 
 Note that in order for Tofu to be able to talk with AWS Bedrock, you need to
-have \`aws configure export-credentials\` run correctly. If you run it from the
-console, it should return something like \` { "AccessKeyId": "XXXXXXXXXXXXXXXX",
+have \`aws configure export-credentials\` run correctly. If you run it from your
+terminal, it should return something like \` { "AccessKeyId": "XXXXXXXXXXXXXXXX",
 "SecretAccessKey": "XXXXXXXXXXXXXXX" } \`
 
 `;
