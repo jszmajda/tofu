@@ -9,7 +9,7 @@ import React from "react";
 import { generateTitle } from "../../lib/bedrock";
 import DateFmt from "../../components/DateFmt";
 import { costOfConversation, totalTokensUsed, usedContextWindow } from "../../lib/conversation_tools";
-import { downloadConversationAsJson } from "../../lib/export";
+import { downloadConversationAsJson, downloadConversationAsMarkdown } from "../../lib/export";
 
 interface Props {
 
@@ -27,6 +27,7 @@ const ConversationPage: FC<Props> = () => {
   const [model,] = useAtom(atoms.currentModel);
   const [availableModels, ] = useAtom(atoms.availableModels);
   const [isConfirming, setIsConfirming] = useState(false);
+  const [userName, ] = useAtom(atoms.userName);
 
   useEffect(() => {
     // on navigation, set the active conversation id to the routed id
@@ -149,21 +150,23 @@ const ConversationPage: FC<Props> = () => {
                 }
                 </span>
               </button>
-              {/* Export conversation button */}
-              <button 
-                className="btn btn-secondary btn-sm ml-2"
-                onClick={() => {
-                  downloadConversationAsJson(activeConversation);
-                }}>
-                <span className="w-4 h-4">
-                  <svg className="fill-secondary-content" viewBox="0 0 36 36">
-                    <title>Export conversation</title>
-                    <path d="M6 14h8V6h10v8h2V6a2 2 0 0 0-2-2H11l-7 7v19a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2H6Zm0-2 6-6v6H6Z"/>
-                    <path d="M28 16a1 1 0 0 0-1 2l3 3H18a1 1 0 0 0 0 2h12l-3 3a1 1 0 1 0 1 2l6-6Z"/>
-                    <path fill="none" d="M0 0h36v36H0z"/>
-                  </svg>
-                </span>
-              </button>
+              {/* Export conversation buttons */}
+              <div className="dropdown dropdown-end">
+                <button className="btn btn-secondary btn-sm ml-2" tabIndex={0}>
+                  <span className="w-4 h-4">
+                    <svg className="fill-secondary-content" viewBox="0 0 36 36">
+                      <title>Export conversation</title>
+                      <path d="M6 14h8V6h10v8h2V6a2 2 0 0 0-2-2H11l-7 7v19a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2H6Zm0-2 6-6v6H6Z"/>
+                      <path d="M28 16a1 1 0 0 0-1 2l3 3H18a1 1 0 0 0 0 2h12l-3 3a1 1 0 1 0 1 2l6-6Z"/>
+                      <path fill="none" d="M0 0h36v36H0z"/>
+                    </svg>
+                  </span>
+                </button>
+                <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                  <li><a onClick={() => downloadConversationAsJson(activeConversation)}>Export as JSON</a></li>
+                  <li><a onClick={() => downloadConversationAsMarkdown(activeConversation, userName)}>Export as Markdown</a></li>
+                </ul>
+              </div>
             </div>
           </div>
           {/* small row of from and to timestamps */}

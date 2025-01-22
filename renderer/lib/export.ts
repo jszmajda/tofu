@@ -14,3 +14,42 @@ export function downloadConversationAsJson(conversation: Conversation) {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+
+export function downloadConversationAsMarkdown(conversation: Conversation, userName: string) {
+  const formatDate = (date: Date) => {
+    return new Date(date).toLocaleString();
+  };
+
+  let markdownContent = `# ${conversation.title}\n\n`;
+  
+  conversation.messages.forEach((message) => {
+    const timestamp = formatDate(message.timestamp);
+    let actorName = ""
+    if(message.role === 'user') {
+      if(userName) {
+        actorName = userName;
+      } else {
+        actorName = 'User';
+      }
+    } else if (message.modelName) {
+      actorName = message.modelName;
+    } else {
+      actorName = message.role.charAt(0).toUpperCase() + message.role.slice(1);
+    }
+    markdownContent += `## ${actorName} (${timestamp})\n\n${message.content}\n\n`;
+    
+    markdownContent += '---\n\n';
+  });
+
+  const blob = new Blob([markdownContent], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `conversation-${conversation.title.replace(/[^a-z0-9]/gi, '_')}.md`;
+  document.body.appendChild(a);
+  a.click();
+  
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
