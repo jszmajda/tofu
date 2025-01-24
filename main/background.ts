@@ -14,8 +14,13 @@ const loadCredentials = () => {
     AccessKeyId: undefined,
     SecretAccessKey: undefined
   }
+  let command = "aws configure export-credentials";
+  // add /usr/bin/env if platform isn't windows
+  if (process.platform !== 'win32') {
+    command = "/usr/bin/env " + command;
+  }
   try {
-    const awsCredentials = execSync('/usr/bin/env aws configure export-credentials').toString();
+    const awsCredentials = execSync(command).toString();
     credentials = JSON.parse(awsCredentials);
     console.log("creds: ", credentials);
   } catch (error) {

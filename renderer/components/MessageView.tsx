@@ -1,4 +1,4 @@
-import { FC, memo } from "react";
+import { FC, memo, useState } from "react";
 import { Message } from "../lib/types";
 import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter'
 import nightOwl from "react-syntax-highlighter/dist/cjs/styles/prism/night-owl";
@@ -15,15 +15,15 @@ interface Props {
 
 const MessageView: FC<Props> = memo(({ id, message, targetRef }) => {
   const [userName, ] = useAtom(atoms.userName);
+  const [justCopied, setJustCopied] = useState(false);
 
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(message.content);
-    } catch (err) {
-      console.error('Failed to copy message:', err);
-    }
+  const handleCopy = () => {
+    navigator.clipboard.writeText(message.content);
+    setJustCopied(true);
+    setTimeout(() => {
+      setJustCopied(false);
+    }, 2000);
   };
-
 
   return (
     <div key={id} className={`chat ${message.role === 'user' ? 'chat-start' : 'chat-end'}`}>
@@ -58,20 +58,26 @@ const MessageView: FC<Props> = memo(({ id, message, targetRef }) => {
           }}
            />
       </div>
-      <div className="chat-footer opacity-50" title="Input and Output tokens used">
+      <div className="chat-footer opacity-50">
         {message.role === 'assistant' && message.inputTokens && message.outputTokens && (
-          <span>
+          <span title="Input and Output tokens used">
             I: {message.inputTokens} O: {message.outputTokens}
           </span>
         )}
         <button
+          className="p-2 rounded-full bg-base-200 hover:bg-base-300 opacity-50 hover:opacity-100 active:scale-95 transition-transform z-10"
           onClick={handleCopy}
-          className="btn btn-xs btn-ghost"
-          title="Copy message content"
+          title="Copy message"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
-          </svg>
+          {justCopied ? (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+          )}
         </button>
       </div>
     </div>
