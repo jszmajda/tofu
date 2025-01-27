@@ -1,5 +1,6 @@
 'use client';
 import { FC, useState, useRef, useEffect } from 'react';
+import TurndownService from 'turndown';
 import { Message } from '../lib/types';
 import { sendConversation } from '../lib/bedrock';
 import MessageView from './MessageView';
@@ -61,6 +62,74 @@ const ChatPanel: FC<Props> = ({ }) => {
   const [systemPrompt, ] = useAtom(atoms.systemPrompt);
   const [isGenerating, setIsGenerating] = useState(false);
   const [obsidianVaultPath, ] = useAtom(atoms.obsidianVaultPath);
+  const turndownService = useRef(
+    new TurndownService({
+      codeBlockStyle: 'fenced',
+      fence: '```'
+    })
+  ).current;
+  
+  const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    
+    if (!inputRef.current) return;
+    
+    const clipboardData = e.clipboardData;
+    const pastedHTML = clipboardData.getData('text/html');
+    const plainText = clipboardData.getData('text/plain');
+    
+    // Process the content
+    let processedContent;
+    if (pastedHTML) {
+      try {
+        // Create a temporary div to parse the HTML
+        const temp = document.createElement('div');
+        temp.innerHTML = pastedHTML;
+        
+        // Transform div>code to pre>code
+        const divCodes = temp.querySelectorAll('div > code');
+        divCodes.forEach(code => {
+          const pre = document.createElement('pre');
+          pre.appendChild(code.cloneNode(true));
+          code.parentElement.replaceWith(pre);
+        });
+        
+        processedContent = turndownService.turndown(temp.innerHTML);
+      } catch (error) {
+        console.error('Failed to convert HTML to Markdown:', error);
+        processedContent = plainText;
+      }
+    } else {
+      processedContent = plainText;
+    }
+  
+    // Rest of your paste handler...
+    // Insert the new content at cursor position
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+  
+    const range = selection.getRangeAt(0);
+    range.deleteContents();
+    range.insertNode(document.createTextNode(processedContent));
+    
+    // Update the cursor position
+    range.collapse(false);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    
+    // Need to wait for DOM update before getting new content
+    requestAnimationFrame(() => {
+      const newContent = inputRef.current.textContent || '';
+      setInput(newContent);
+      
+      if (activeConversation?.id) {
+        setUnsentMessagesMap({
+          ...unsentMessagesMap,
+          [activeConversation.id]: newContent
+        });
+      }
+    });
+  };
 
   // Load unsent message when conversation changes
   useEffect(() => {
@@ -270,10 +339,11 @@ const ChatPanel: FC<Props> = ({ }) => {
             }}
             contentEditable={true}
             role="textbox"
+            onPaste={handlePaste}
             onInput={(e) => {
               const newInput = e.currentTarget.textContent || '';
               setInput(newInput);
-              // Save unsent message for this conversation
+              
               if (activeConversation?.id) {
                 setUnsentMessagesMap({
                   ...unsentMessagesMap,
