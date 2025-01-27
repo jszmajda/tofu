@@ -1,4 +1,3 @@
-
 # <img src="renderer/public/images/tofu-small.png" alt="Tofu Logo" height="30" /> Tofu: An Electron-based AI Chat Application
 
 <img src="resources/Screenshot.png" alt="Tofu screenshot"/>
@@ -13,7 +12,13 @@ Key features of Tofu include:
 - Integration with Amazon Bedrock for AI model access
 - Support for multiple AI models, including Claude 3.5 Haiku and Claude 3.5 Sonnet versions
 - Real-time streaming of AI responses
-- Conversation management and history
+- Conversation management with drag-and-drop reordering
+- Markdown support in messages with syntax highlighting
+- Dark mode support with customizable themes
+- Export conversations to JSON or Markdown
+- System prompt customization
+- Token usage tracking and cost calculation
+- Obsidian vault integration for loading document content
 - Cross-platform compatibility (Windows, macOS, Linux)
 
 The application is built using Electron, React, and TypeScript, providing a robust and maintainable codebase. It leverages Electron Forge for building and packaging, ensuring a streamlined development and distribution process.
@@ -52,17 +57,39 @@ npm run build
 
 ### Configuration
 
-The application reads AWS credentials from either the AWS CLI (using `aws configure export-credentials`), or the `.aws/credentials` file in your home directory. Ensure this file is properly configured with your AWS access key and secret key.
+The application can be configured through the Settings page, where you can:
+- Set your display name
+- Choose light and dark mode themes
+- Configure the system prompt
+- Set your Obsidian vault path for document integration
+- Reset application data if needed
 
 ### Common Use Cases
 
 1. Starting a new conversation:
-   - Launch the application
+   - Click the "New Chat" button in the sidebar
    - Select an AI model from the dropdown
    - Type your message in the chat input and press Enter
 
-2. Continuing a previous conversation:
-   - Select a conversation from the conversation list on the left
-   - The chat history will load, and you can continue the conversation
+2. Managing conversations:
+   - Drag and drop conversations in the sidebar to reorder them
+   - Click the title of a conversation to rename it
+   - Use the auto-generate title button to create a title based on conversation content
+   - Export conversations to JSON or Markdown format
+   - Delete conversations using the delete button
 
-Note: The application uses a secure preload script to expose AWS credentials to the renderer process
+3. Using Obsidian integration:
+   - Set your Obsidian vault path in Settings
+   - Use `!!load filename` in your messages to include content from your vault
+
+Note: The application uses a secure preload script to handle AWS credentials and Obsidian vault access
+```
+
+This updated readme better reflects the current feature set of Tofu, including:
+- Drag-and-drop conversation management
+- Theme customization
+- Export functionality
+- Token tracking and cost calculation
+- Obsidian integration
+- Auto-generate title feature
+- More detailed configuration options
