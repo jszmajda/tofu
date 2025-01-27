@@ -83,13 +83,3 @@ The application can be configured through the Settings page, where you can:
    - Use `!!load filename` in your messages to include content from your vault
 
 Note: The application uses a secure preload script to handle AWS credentials and Obsidian vault access
-```
-
-This updated readme better reflects the current feature set of Tofu, including:
-- Drag-and-drop conversation management
-- Theme customization
-- Export functionality
-- Token tracking and cost calculation
-- Obsidian integration
-- Auto-generate title feature
-- More detailed configuration options
