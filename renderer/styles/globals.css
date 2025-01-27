@@ -2,6 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Code block styles */
+.prose pre > code:not([class]),
+.prose pre > code[class*="language-markdown"] {
+  white-space: pre-wrap !important; 
+  word-wrap: break-word !important;
+  text-wrap: wrap !important;
+}
+
+.prose pre > code[class*="language-"]:not([class*="language-markdown"]) {
+  white-space: pre !important;
+  overflow-x: auto !important;
+  text-wrap: nowrap !important;
+}
+
 /*
 @layer base {
   body {

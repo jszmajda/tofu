@@ -5,8 +5,8 @@ export const buildDefaultConversation = (existingConversations?: { [key: string]
   const id = now.toISOString();
   const friendlyDate = now.toLocaleDateString("en-US", { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
   const maxOrder = existingConversations ? 
-    Math.max(-1, ...Object.values(existingConversations).map(c => c.order ?? -1)) :
-    -1;
+    Math.max(0, ...Object.values(existingConversations).map(c => c.order ?? 0)) :
+    0;
   return {
     messages: [],
     totalCost: 0,

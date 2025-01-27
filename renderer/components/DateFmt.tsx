@@ -16,7 +16,7 @@ const DateFmt: FC<Props> = ({ date, format, className }) => {
   if(format === "short"){
     // done!
   }
-  return <span className={className}>{dateOutput}</span>
+  return <span className={className} suppressHydrationWarning>{dateOutput}</span>
 }
 
 export default DateFmt;

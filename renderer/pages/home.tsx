@@ -40,7 +40,7 @@ const HomePage: FC<Props> = ({ }) => {
           and engage in meaningful conversations across various topics.
         </p>
 
-        <p className="prose mb-10 items-start">
+        <p className="prose mb-10 items-start" suppressHydrationWarning>
           <ReactMarkdown>{setupMessages}</ReactMarkdown>
         </p>
         

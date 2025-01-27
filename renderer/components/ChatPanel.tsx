@@ -89,10 +89,10 @@ const ChatPanel: FC<Props> = ({ }) => {
 
   const responseMessage: Message = {
     id: -1,
-    role: "assistant",
+    role: "assistant", 
     content: "",
     timestamp: new Date(),
-    modelId: currentModel.modelId, 
+    modelId: currentModel.modelId,
     modelName: currentModel.name,
   }
 
@@ -160,11 +160,16 @@ const ChatPanel: FC<Props> = ({ }) => {
       const nextConversationWithoutUser = updateConversationMessages(activeConversation, messagesWithoutUser);
       setActiveConversation(nextConversationWithoutUser);
       
-      // Restore the original input
+      // Restore the original input and unsent message
       setInput(originalInput);
       if (inputRef.current) {
         inputRef.current.textContent = originalInput;
       }
+      setUnsentMessagesMap({
+        ...nextUnsentMessages,
+        [activeConversation.id]: originalInput
+      });
+      
       // Set error message to be displayed
       setErrorMessage(`Error: ${error.message}`);
     } finally {

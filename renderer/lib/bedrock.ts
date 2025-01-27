@@ -58,8 +58,8 @@ export const generateTitle = async (conversation: Conversation, model: Model): P
         }
     });
 
-    //convert conversation messages into one string that shows the AI what's in the conversation
-    const conversationString = conversation.messages.map((message) => {
+    //convert conversation messages into one string that shows the AI what's in the conversation, using only first 4 messages
+    const conversationString = conversation.messages.slice(0,4).map((message) => {
         return `${message.role}: ${message.content}`;
     }).join("\n");
 
@@ -77,7 +77,7 @@ export const generateTitle = async (conversation: Conversation, model: Model): P
         ],
         system: [
             {
-                text: "You are a helpful assistant that generates a short title for a conversation. The title should be no more than 10 words. The title should be a single sentence. "
+                text: "You are a helpful assistant that generates a short title for a conversation. The title should be no more than 5 words. The title should be a single sentence. "
             },
         ],
         inferenceConfig: { maxTokens: 1024, temperature: 0.1, topP: 0.9 }
