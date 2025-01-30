@@ -1,252 +1,33 @@
 'use client';
-import { FC, useState, useRef, useEffect } from 'react';
-import TurndownService from 'turndown';
-import { Message } from '../lib/types';
-import { sendConversation } from '../lib/bedrock';
-import MessageView from './MessageView';
+import { FC, useRef, useEffect } from 'react';
 import React from 'react';
 import * as atoms from '../lib/atoms';
 import { useAtom } from 'jotai';
-import { buildNewMessage, updateConversationMessages } from '../lib/conversation_tools';
-import { marked } from 'marked';
+import { updateConversationMessages } from '../lib/conversation_tools';
 import NoSSR from './NoSSR';
+import { useScrollBehavior } from '../hooks/useScrollBehavior';
+import { useObsidianProcessor } from '../hooks/useObsidianProcessor';
+import { Message } from '../lib/types';
+import { MessageHandlerActions, MessageHandlerContext } from '../types/chat';
+import { useMessageHandler } from '../hooks/useMessageHandler';
+import ChatInput from './ChatInput';
+import MessageList from './MessageList';
+import { useInputHandler } from '../hooks/useInputHandler';
 
 interface Props {
 }
 
-declare global {
-    interface Window {
-        obsidianAPI?: any
-    }
-}
-
-async function handleLoadDocument(pathAndFilename, vaultPath) {
-  try {
-    const result = await window.obsidianAPI.loadDocument(pathAndFilename, vaultPath);
-    if (result.success) {
-      return result.content;
-    } else {
-      console.error('Error:', result.error);
-    }
-  } catch (error) {
-    console.error('Failed to load document:', error);
-  }
-}
-
-async function handleFindFile(title, vaultPath) {
-  try {
-    const result = await window.obsidianAPI.findFile(title, vaultPath);
-    if (result.success) {
-      return result.file;
-    } else {
-      console.error('Error:', result.error);
-    }
-  } catch (error) {
-    console.error('Failed to find file:', error);
-  }
-}
-
-
 const ChatPanel: FC<Props> = ({ }) => {
   const [unsentMessagesMap, setUnsentMessagesMap] = useAtom(atoms.unsentMessages);
-  const [input, setInput] = useState('');
-  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const messagesEndRef = useRef(null);
-  const containerRef = useRef(null);
   const responseRef = useRef(null);
-  const inputRef = useRef<HTMLDivElement>(null);
   const [currentModel, ] = useAtom(atoms.currentModel);
   const [activeConversation, setActiveConversation] = useAtom(atoms.activeConversation);
   const [messages, setActiveConversationMessages]: [Message[], any] = useAtom(atoms.activeConversationMessages);
   const [systemPrompt, ] = useAtom(atoms.systemPrompt);
-  const [isGenerating, setIsGenerating] = useState(false);
   const [obsidianVaultPath, ] = useAtom(atoms.obsidianVaultPath);
-  const turndownService = useRef(
-    new TurndownService({
-      codeBlockStyle: 'fenced',
-      fence: '```'
-    })
-  ).current;
-  
-  const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    
-    if (!inputRef.current) return;
-    
-    const clipboardData = e.clipboardData;
-    const pastedHTML = clipboardData.getData('text/html');
-    const plainText = clipboardData.getData('text/plain');
-    
-    // Process the content
-    let processedContent;
-    if (pastedHTML) {
-      try {
-        // Create a temporary div to parse the HTML
-        const temp = document.createElement('div');
-        temp.innerHTML = pastedHTML;
-        
-        // Transform div>code to pre>code
-        const divCodes = temp.querySelectorAll('div > code');
-        divCodes.forEach(code => {
-          const pre = document.createElement('pre');
-          pre.appendChild(code.cloneNode(true));
-          code.parentElement.replaceWith(pre);
-        });
-        
-        processedContent = turndownService.turndown(temp.innerHTML);
-      } catch (error) {
-        console.error('Failed to convert HTML to Markdown:', error);
-        processedContent = plainText;
-      }
-    } else {
-      processedContent = plainText;
-    }
-  
-    // Rest of your paste handler...
-    // Insert the new content at cursor position
-    const selection = window.getSelection();
-    if (!selection.rangeCount) return;
-  
-    const range = selection.getRangeAt(0);
-    range.deleteContents();
-    range.insertNode(document.createTextNode(processedContent));
-    
-    // Update the cursor position
-    range.collapse(false);
-    selection.removeAllRanges();
-    selection.addRange(range);
-    
-    // Need to wait for DOM update before getting new content
-    requestAnimationFrame(() => {
-      const newContent = inputRef.current.textContent || '';
-      setInput(newContent);
-      
-      if (activeConversation?.id) {
-        setUnsentMessagesMap({
-          ...unsentMessagesMap,
-          [activeConversation.id]: newContent
-        });
-      }
-    });
-  };
 
-  // Load unsent message when conversation changes
-  useEffect(() => {
-    if (activeConversation?.id && unsentMessagesMap[activeConversation.id]) {
-      setInput(unsentMessagesMap[activeConversation.id]);
-      if (inputRef.current) {
-        inputRef.current.textContent = unsentMessagesMap[activeConversation.id];
-      }
-    } else {
-      setInput('');
-      if (inputRef.current) {
-        inputRef.current.textContent = '';
-      }
-    }
-    if (inputRef.current) {
-      inputRef.current.focus();
-      // Set cursor to end of content
-      const range = document.createRange();
-      const selection = window.getSelection();
-      range.selectNodeContents(inputRef.current);
-      range.collapse(false);
-      selection.removeAllRanges();
-      selection.addRange(range);
-    }
-  }, [activeConversation]);
+  const { preProcessMessage } = useObsidianProcessor(obsidianVaultPath);
 
-  const responseMessage: Message = {
-    id: -1,
-    role: "assistant", 
-    content: "",
-    timestamp: new Date(),
-    modelId: currentModel.modelId,
-    modelName: currentModel.name,
-  }
-
-  // search message for obsidian path documents to be loaded, indicated by `!!load <filename>`
-  const preProcessMessage = async (message: string): Promise<string> => {
-    if(obsidianVaultPath === null || obsidianVaultPath === undefined){
-      return message;
-    }
-      // Match !!load followed by text until either a newline or closing tag
-    const regex = /!!load\s+([^<>\n]+?)(?=\s*$|\s*<|[\n])/g;
-    let processedMessage = message;
-    let match;
-
-    while ((match = regex.exec(message)) !== null) {
-      const filename = match[1];
-      const pathAndFilename = await handleFindFile(filename, obsidianVaultPath);
-      if (pathAndFilename !== null) {
-        const content = await handleLoadDocument(pathAndFilename, obsidianVaultPath);
-        processedMessage = processedMessage.replace(match[0], content);
-      }
-    }
-
-    return processedMessage;
-  }
-
-  const sendMessage = async () => {
-    setIsGenerating(true);
-    setErrorMessage(null);
-    const originalInput = input;
-    const processedInput = await preProcessMessage(input);
-    const nextMessages: Message[] = [...messages];
-    const userMessage: Message = buildNewMessage(nextMessages, 'user', processedInput, currentModel);
-    const model = activeConversation.currentModel || currentModel;
-    // Clear input and unsent message storage
-    setInput('');
-    const nextUnsentMessages = { ...unsentMessagesMap };
-    delete nextUnsentMessages[activeConversation.id];
-    setUnsentMessagesMap(nextUnsentMessages);
-
-    // Add user message immediately
-    nextMessages[userMessage.id] = userMessage;
-    setActiveConversationMessages([...nextMessages]); // Create new array to trigger re-render
-    const nextConversationWithUser = updateConversationMessages(activeConversation, nextMessages);
-    setActiveConversation(nextConversationWithUser);
-
-    try {
-      const aiMessage: Message = buildNewMessage(nextMessages, 'assistant', '', currentModel);
-      for await (const message of sendConversation(model, systemPrompt, nextMessages, aiMessage)){
-        responseMessage.content = message.content;
-        if (responseRef) {
-          responseRef.current.innerHTML = marked.parse(message.content)
-          handleScroll(null);
-          scrollToBottom();
-        }
-      }
-
-      nextMessages[aiMessage.id] = aiMessage;
-      setActiveConversationMessages(nextMessages);
-      const nextConversation = updateConversationMessages(activeConversation, nextMessages);
-      setActiveConversation(nextConversation);
-    } catch (error) {
-      // Remove the user message from the conversation
-      const messagesWithoutUser = nextMessages.slice(0, -1);
-      setActiveConversationMessages(messagesWithoutUser);
-      const nextConversationWithoutUser = updateConversationMessages(activeConversation, messagesWithoutUser);
-      setActiveConversation(nextConversationWithoutUser);
-      
-      // Restore the original input and unsent message
-      setInput(originalInput);
-      if (inputRef.current) {
-        inputRef.current.textContent = originalInput;
-      }
-      setUnsentMessagesMap({
-        ...nextUnsentMessages,
-        [activeConversation.id]: originalInput
-      });
-      
-      // Set error message to be displayed
-      setErrorMessage(`Error: ${error.message}`);
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  
   const scrollToBottom = () => {
     if (shouldAutoScroll && messagesEndRef.current) {
       // messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -254,121 +35,92 @@ const ChatPanel: FC<Props> = ({ }) => {
     }
   };
 
-  // scroll to bottom on message updates
-  useEffect(() => {
-    scrollToBottom();
-  }, [shouldAutoScroll, messages, responseRef, activeConversation]);
+  const {
+    containerRef,
+    messagesEndRef,
+    shouldAutoScroll,
+    handleScroll,
+    scrollToBottomSmooth
+  } = useScrollBehavior({
+    messages,
+    responseRef,
+    activeConversation
+  });
 
-  // scroll to bottom on load
-  useEffect(() => {
-    scrollToBottom();
-  }, []);
-
-  const handleScroll = (e) => {
-    const container = containerRef.current;
-    if (container) {
-      const { scrollTop, scrollHeight, clientHeight } = container;
-      // If we're not near the bottom, disable auto-scroll
-      const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
-      setShouldAutoScroll(isNearBottom);
+  const messageHandlerContext: MessageHandlerContext = {
+    activeConversation,
+    currentModel,
+    systemPrompt,
+    responseRef,
+    scrollHandlers: {
+      handleScroll,
+      scrollToBottom
     }
   };
+
+  const messageHandlerActions: MessageHandlerActions = {
+    setActiveConversation,
+    setActiveConversationMessages,
+    setUnsentMessagesMap
+  };
+
+  const {
+    sendMessage,
+    isGenerating,
+    errorMessage,
+    setErrorMessage,
+    responseMessage
+  } = useMessageHandler(messageHandlerContext, messageHandlerActions);
+
+  const handleTruncate = (newMessages: Message[]) => {
+    setActiveConversationMessages(newMessages);
+    const nextConversation = updateConversationMessages(activeConversation, newMessages);
+    setActiveConversation(nextConversation);
+  };
+
+  const {
+    input,
+    inputRef,
+    handleInputChange,
+    handleSend
+  } = useInputHandler({
+    activeConversation,
+    unsentMessagesMap,
+    setUnsentMessagesMap,
+    onSendMessage: sendMessage,
+    preProcessMessage
+  });
 
   return (
     <NoSSR>
 
       <div ref={containerRef} className="grow overflow-y-auto w-full overscroll-contain" onScroll={handleScroll}>
-          {messages.map((message, index) => (
-            <React.Fragment key={message.id}>
-              <MessageView id={message.id.toString()} message={message} />
-              { message.role === "assistant" && index < messages.length - 1 ? 
-              <div className="h-4 group relative">
-                <button 
-                  className="scissors-icon opacity-5 hover:opacity-100 transition absolute left-1/2 transform -translate-x-1/2 hover:bg-base-200 rounded-full p-1"
-                  onClick={() => {
-                    const newMessages = messages.slice(0, index + 1);
-                    setActiveConversationMessages(newMessages);
-                    const nextConversation = updateConversationMessages(activeConversation, newMessages);
-                    setActiveConversation(nextConversation);
-                  }}
-                >
-                  <svg className="fill-base-content" width="32" height="32" viewBox="0 0 498.2 498.2">
-                    <path d="M48 363H15a15 15 0 0 0 0 30h33a15 15 0 0 0 0-30zm112 0h-56a15 15 0 0 0 0 30h56a15 15 0 0 0 0-30zm112 0h-56a15 15 0 0 0 0 30h56a15 15 0 0 0 0-30zm112 0h-56a15 15 0 1 0 0 30h56a15 15 0 0 0 0-30zm89 0h-33a15 15 0 1 0 0 30h33a15 15 0 0 0 0-30zm25-93c-1-9-4-17-9-24l-11-11a65 65 0 0 0-41-12l-3 1c-8 0-16 2-24 6l-3 2c-23 12-40 17-52 19a168 168 0 0 1 36-47c5-6 10-13 13-21l1-3c6-20 3-41-8-56a47 47 0 0 0-44-18c-10 1-20 6-28 12a66 66 0 0 0-21 31c-7 20-5 42 7 57a49 49 0 0 0 11 10l-17 39-125 22h-1l-9 2c-11 4-17 14-21 21l-3 10-2 8a4 4 0 0 0 5 4l136-17-20 48h48l26-55 40-5 7 13c11 15 30 23 50 23 24 0 45-12 55-30 6-9 8-19 7-29zm-158-79-4-4c-5-6-6-16-4-23 1-9 7-17 14-23 6-5 14-6 20-3l6 5c4 5 6 13 5 21-2 10-7 20-15 25-6 4-15 7-22 2zm127 85c0 4-2 7-4 10-6 7-16 12-26 12-9 0-20-2-26-10l-1-1c-4-6-3-14 2-20 5-7 13-11 22-12h1c9-1 21 1 28 9l1 1c2 3 4 7 3 11z" />
-                  </svg>
-                </button>
-              </div>
-              : "" }
-            </React.Fragment>
-          ))}
-          {isGenerating ? 
-            <MessageView key={responseMessage.id} id={responseMessage.id.toString()} message={responseMessage} targetRef={responseRef} />
-          : ""}
-          <div ref={messagesEndRef} />
+      <MessageList 
+          messages={messages}
+          isGenerating={isGenerating}
+          responseMessage={responseMessage}
+          responseRef={responseRef}
+          messagesEndRef={messagesEndRef}
+          onTruncate={handleTruncate}
+        />
       </div>
       {!shouldAutoScroll && (
         <button 
           className="fixed bottom-24 left-1/2 btn btn-primary rounded-full icon-inline icon-arrow-down"
-          onClick={() => {
-            if (containerRef.current) {
-              // Add smooth scrolling behavior
-              containerRef.current.scrollTo({
-                top: containerRef.current.scrollHeight,
-                behavior: 'smooth'
-              });
-              setShouldAutoScroll(true);
-            }
-          }}
+          onClick={scrollToBottomSmooth}
         >
           <svg className="stroke-primary-content" width="16" height="16" viewBox="0 0 330 330"><path d="M254 234c-2-5-8-9-14-9h-60V15a15 15 0 0 0-30 0v210H90a15 15 0 0 0-11 26l75 75a15 15 0 0 0 22 0l75-75c4-5 5-11 3-17zm-89 60-39-39h78l-39 39z"/></svg>
         </button>
       )}     
-      <div className="gap-4 flex-none box-border mt-3">
-        {errorMessage && (
-          <div className="alert alert-error mb-2">
-            <span>{errorMessage}</span>
-            <button className="btn btn-ghost btn-xs" onClick={() => setErrorMessage(null)}>Dismiss</button>
-          </div>
-        )}
-        <div className="flex">
-          <div
-            className="flex-1 input input-primary py-2 overflow-y-auto whitespace-pre-wrap min-h-[3rem] rounded-r-none rounded-bl-none focus:-outline-offset-2"
-            style={{ 
-              maxHeight: '50vh',
-              height: 'fit-content',
-              resize: 'none'
-            }}
-            contentEditable={true}
-            role="textbox"
-            onPaste={handlePaste}
-            onInput={(e) => {
-              const newInput = e.currentTarget.textContent || '';
-              setInput(newInput);
-              
-              if (activeConversation?.id) {
-                setUnsentMessagesMap({
-                  ...unsentMessagesMap,
-                  [activeConversation.id]: newInput
-                });
-              }
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-              }
-            }}
-            // Use ref to access and clear the div
-            ref={(el) => {
-              inputRef.current = el;
-              if (input === '' && el) {
-                el.innerHTML = '';
-              }
-            }}
-          />
-          <button className="py-2 px-4 btn btn-primary rounded-l-none" onClick={sendMessage}>Send</button>
-        </div>
-      </div>
 
+      <ChatInput
+        input={input}
+        inputRef={inputRef}
+        onInputChange={handleInputChange}
+        onSend={handleSend}
+        errorMessage={errorMessage}
+        onDismissError={() => setErrorMessage(null)}
+      />
     </NoSSR>
   );
 };
