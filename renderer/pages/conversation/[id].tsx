@@ -126,7 +126,7 @@ const ConversationPage: FC<Props> = () => {
             </div>
             <div className="flex flex-row items-center">
               {/* show total tokens used */}
-              <span className="mr-2 opacity-50">{friendlyNumber(totalTokensUsed(activeConversation))} tok ({friendlyDecimal(usedContextWindow(activeConversation, model))}%)</span>
+              <span className="mr-2 opacity-50">{friendlyNumber(totalTokensUsed(activeConversation))} tok ({friendlyDecimal(usedContextWindow(activeConversation, model) * 100)}%)</span>
               {/* show total cost of conversation */}
               <span className="mr-2">${conversationCost.toFixed(2)}</span>
               {/* Two-step delete button that changes icon on first click */}
