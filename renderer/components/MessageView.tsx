@@ -28,11 +28,22 @@ const MessageView: FC<Props> = memo(({ id, message, targetRef }) => {
             a: ({ node, ...props }) => (
               <a {...props} target="_blank" rel="noreferrer" />
             ),
-            code: ({ className, children }) => (
-              <CodeBlock className={className}>
-                {String(children)}
-              </CodeBlock>
-            ),
+            code: ({ className, children, node, ...props }) => {
+              const content = String(children);
+              const isMultiLine = content.includes('\n');
+              
+              // If it's single line and no language specified, treat as inline
+              if (!isMultiLine && !className) {
+                return <code className={className}>{children}</code>;
+              }
+              
+              // Otherwise it's a code block
+              return (
+                <CodeBlock className={className}>
+                  {content}
+                </CodeBlock>
+              );
+            },
           }}
            />
       </div>
