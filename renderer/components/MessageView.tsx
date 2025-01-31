@@ -1,4 +1,4 @@
-import { FC, memo, useState } from "react";
+import { FC, memo } from "react";
 import { Message } from "../lib/types";
 import ReactMarkdown from 'react-markdown';
 import DateFmt from "./DateFmt";

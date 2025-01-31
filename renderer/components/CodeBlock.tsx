@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC } from "react";
 import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter'
 import nightOwl from "react-syntax-highlighter/dist/cjs/styles/prism/night-owl";
 import { CopyButton } from "./CopyButton";

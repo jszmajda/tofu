@@ -1,15 +1,15 @@
-import React, { useRef } from 'react';
+import { FC, RefObject } from 'react';
 import { usePasteHandler } from '../hooks/usePasteHandler';
 
 interface ChatInputProps {
-  inputRef: React.RefObject<HTMLDivElement>;
+  inputRef: RefObject<HTMLDivElement>;
   onInputChange: (content: string) => void;
   onSend: () => void;
   errorMessage: string | null;
   onDismissError: () => void;
 }
 
-const ChatInput: React.FC<ChatInputProps> = ({
+const ChatInput: FC<ChatInputProps> = ({
   inputRef,
   onInputChange,
   onSend,
