@@ -2,7 +2,6 @@ import React, { useRef } from 'react';
 import { usePasteHandler } from '../hooks/usePasteHandler';
 
 interface ChatInputProps {
-  input: string;
   inputRef: React.RefObject<HTMLDivElement>;
   onInputChange: (content: string) => void;
   onSend: () => void;
@@ -11,7 +10,6 @@ interface ChatInputProps {
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({
-  input,
   inputRef,
   onInputChange,
   onSend,

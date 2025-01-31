@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback } from 'react';
 import { Conversation } from '../lib/types';
 
 type UnsentMessagesMap = Record<string, string>;
@@ -18,32 +18,24 @@ export const useInputHandler = ({
   onSendMessage,
   preProcessMessage
 }: InputHandlerProps) => {
-  const [input, setInput] = useState('');
   const inputRef = useRef<HTMLDivElement>(null);
 
-  const updateInputContent = useCallback((content: string) => {
-    setInput(content);
-    if (inputRef.current) {
-      inputRef.current.textContent = content;
-    }
-  }, []);
 
   const handleInputChange = useCallback((newContent: string) => {
-    updateInputContent(newContent);
     if (activeConversation?.id) {
       setUnsentMessagesMap((prev: UnsentMessagesMap) => ({
         ...prev,
         [activeConversation.id]: newContent
       }));
     }
-  }, [activeConversation?.id, setUnsentMessagesMap, updateInputContent]);
+  }, [activeConversation?.id, setUnsentMessagesMap]);
 
   const handleSend = async () => {
-    const processedInput = await preProcessMessage(input);
+    const currentContent = inputRef.current?.textContent || '';
+    const processedInput = await preProcessMessage(currentContent);
     
     // Clear input immediately before sending
-    const originalInput = input;
-    updateInputContent('');
+    inputRef.current.textContent = '';
 
     // Clear unsent message for this conversation
     if (activeConversation?.id) {
@@ -54,15 +46,15 @@ export const useInputHandler = ({
       });
     }
   
-    const result = await onSendMessage(originalInput, processedInput);
+    const result = await onSendMessage(currentContent, processedInput);
   
     // If there's an error, restore the original input
-    if (result.error) {
-      updateInputContent(originalInput);
+    if (result.error && inputRef.current) {
+      inputRef.current.textContent = currentContent;
       if (activeConversation?.id) {
         setUnsentMessagesMap((prev: UnsentMessagesMap) => ({
           ...prev,
-          [activeConversation.id]: originalInput
+          [activeConversation.id]: currentContent
         }));
       }
     }
@@ -71,27 +63,25 @@ export const useInputHandler = ({
   // Load unsent message when conversation changes
   useEffect(() => {
     if (!activeConversation?.id) return;
-
+  
     const savedContent = unsentMessagesMap[activeConversation.id] || '';
-    updateInputContent(savedContent);
+    inputRef.current.textContent = savedContent
+
+    if (!inputRef.current) return;
     
-    if (inputRef.current) {
-      inputRef.current.focus();
-      
-      // Set cursor to end of content
-      const range = document.createRange();
-      const selection = window.getSelection();
-      if (selection) {
-        range.selectNodeContents(inputRef.current);
-        range.collapse(false);
-        selection.removeAllRanges();
-        selection.addRange(range);
-      }
+    inputRef.current.focus();
+    const range = document.createRange();
+    const selection = window.getSelection();
+    if (selection) {
+      range.selectNodeContents(inputRef.current);
+      range.collapse(false);
+      selection.removeAllRanges();
+      selection.addRange(range);
     }
-  }, [activeConversation?.id, unsentMessagesMap, updateInputContent]);
+  }, [activeConversation?.id]);
+  
 
   return {
-    input,
     inputRef,
     handleInputChange,
     handleSend

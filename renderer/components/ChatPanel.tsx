@@ -1,5 +1,5 @@
 'use client';
-import { FC, useRef, useEffect } from 'react';
+import { FC, useRef } from 'react';
 import React from 'react';
 import * as atoms from '../lib/atoms';
 import { useAtom } from 'jotai';
@@ -79,7 +79,6 @@ const ChatPanel: FC<Props> = ({ }) => {
   };
 
   const {
-    input,
     inputRef,
     handleInputChange,
     handleSend
@@ -114,7 +113,6 @@ const ChatPanel: FC<Props> = ({ }) => {
       )}     
 
       <ChatInput
-        input={input}
         inputRef={inputRef}
         onInputChange={handleInputChange}
         onSend={handleSend}
