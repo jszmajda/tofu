@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useEffect } from 'react';
 import TurndownService from 'turndown';
 
 interface PasteHandlerOptions {
@@ -14,6 +14,16 @@ export const usePasteHandler = ({ onContentChange, inputRef }: PasteHandlerOptio
       fence: '```'
     })
   ).current;
+
+  //configure turndown service to filter out data:images
+  useEffect(() => {
+    turndownService.addRule('filterImages', {
+      filter: ['img'],
+      replacement: function(content) {
+        return '';
+      }
+    });
+  }, [turndownService]);
 
   const handlePaste = useCallback((e: React.ClipboardEvent<HTMLDivElement>) => {
     e.preventDefault();
