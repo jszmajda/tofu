@@ -105,7 +105,7 @@ const loadDocument = async (pathAndFilename: string, vaultPath: string) => {
 ipcMain.handle('load-document', async (event, { pathAndFilename, vaultPath }) => {
   try {
     const content = await loadDocument(pathAndFilename, vaultPath);
-    return { success: true, content };
+    return { success: true, content: content };
   } catch (error) {
     return { success: false, error: error.message };
   }
@@ -114,7 +114,7 @@ ipcMain.handle('load-document', async (event, { pathAndFilename, vaultPath }) =>
 ipcMain.handle('find-file', async (event, { title, vaultPath }) => {
   try {
     const file = await findFileForTitle(title, vaultPath);
-    return { success: true, file };
+    return { success: true, content: file };
   } catch (error) {
     return { success: false, error: error.message };
   }

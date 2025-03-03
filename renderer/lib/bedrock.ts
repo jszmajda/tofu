@@ -40,6 +40,14 @@ export const getAvailableModels = async (): Promise<Model[]> => {
             costPerOutputTokenK: 0.015,
             region: 'us-east-1',
             maxContextTokens: 200000
+        },
+        {
+            name: "dummy Claude 3.7 Sonnet",
+            modelId: "aaaaus.anthropic.claude-3-7-sonnet-20250219-v1:0",
+            costPerInputTokenK: 0.003,
+            costPerOutputTokenK: 0.015,
+            region: 'us-east-1',
+            maxContextTokens: 200000
         }
     ];
 };

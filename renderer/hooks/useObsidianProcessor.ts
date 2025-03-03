@@ -13,11 +13,15 @@ export const useObsidianProcessor = (vaultPath: string | null) => {
     let match;
 
     while ((match = regex.exec(message)) !== null) {
+      console.log("match", match);
       const filename = match[1];
       const fileResult = await ObsidianService.findFile(filename, vaultPath);
+      console.log("fileResult", fileResult);
       
       if (fileResult.success && fileResult.content) {
+        console.log("fileResult.content", fileResult.content);
         const documentResult = await ObsidianService.loadDocument(fileResult.content, vaultPath);
+        console.log("documentResult", documentResult);
         if (documentResult.success && documentResult.content) {
           processedMessage = processedMessage.replace(match[0], documentResult.content);
         }
