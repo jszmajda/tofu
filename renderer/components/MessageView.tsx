@@ -25,7 +25,7 @@ const MessageView: FC<Props> = memo(({ id, message, targetRef }) => {
         {/* render reasoningContent as small italics above the main content */}
         {message.reasoningContent && (
           <div className="text-xs italic opacity-50">
-            {message.reasoningContent}
+            <ReactMarkdown>{message.reasoningContent}</ReactMarkdown>
           </div>
         )}
         <ReactMarkdown
