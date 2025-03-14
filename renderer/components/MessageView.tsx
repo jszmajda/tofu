@@ -22,6 +22,12 @@ const MessageView: FC<Props> = memo(({ id, message, targetRef }) => {
         {message.role === 'user' ? userName : message.modelName || 'assistant'} @ <DateFmt date={message.timestamp} format="chat"/>
       </div>
       <div className={`text-sm prose max-w-full chat-bubble bg-base-100 ring-2 ring-inset p-5 text-base-content marker:text-base-content ${message.role === 'user' ? 'ring-info' : 'ring-accent'}`} ref={targetRef}>
+        {/* render reasoningContent as small italics above the main content */}
+        {message.reasoningContent && (
+          <div className="text-xs italic opacity-50">
+            {message.reasoningContent}
+          </div>
+        )}
         <ReactMarkdown
           children={message.content}
           components={{

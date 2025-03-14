@@ -40,7 +40,24 @@ export const getAvailableModels = async (): Promise<Model[]> => {
             costPerOutputTokenK: 0.015,
             region: 'us-east-1',
             maxContextTokens: 200000
-        }
+        },
+        {
+            name: "Nova Pro",
+            modelId: "arn:aws:bedrock:us-east-1:676372518487:inference-profile/us.amazon.nova-pro-v1:0",
+            costPerInputTokenK: 0.0008,
+            costPerOutputTokenK: 0.0032,
+            region: 'us-east-1',
+            maxContextTokens: 200000
+        },
+        {
+            name: "DeepSeek R1",
+            modelId: "arn:aws:bedrock:us-east-1:676372518487:inference-profile/us.deepseek.r1-v1:0",
+            costPerInputTokenK: 0.00135,
+            costPerOutputTokenK: 0.0054,
+            region: 'us-east-1',
+            maxContextTokens: 200000
+        },
+
     ];
 };
 
@@ -148,9 +165,18 @@ export const sendConversation = async function * (
         const response = await client.send(command);
         for await (const item of response.stream) {
             if (item.contentBlockDelta) {
-                const chunk: string = item.contentBlockDelta.delta?.text;
-                responseMessage.content += chunk;
+                // Handle reasoning content
+                if (item.contentBlockDelta.delta?.reasoningContent) {
+                    const chunk: string = item.contentBlockDelta.delta.reasoningContent.text || "";
+                    responseMessage.reasoningContent = (responseMessage.reasoningContent || "") + chunk;
+                }
+                // Handle regular text content
+                else if (item.contentBlockDelta.delta?.text) {
+                    const chunk: string = item.contentBlockDelta.delta.text;
+                    responseMessage.content += chunk;
+                }
                 yield responseMessage;
+
             } else if (item.metadata){
                 responseMessage.inputTokens = item.metadata.usage.inputTokens;
                 responseMessage.outputTokens = item.metadata.usage.outputTokens;
@@ -167,6 +193,9 @@ export const sendConversation = async function * (
 // Types for Bedrock ContentBlocks
 type ContentBlock = {
     text?: string;
+    reasoningContext?: {
+        text: string;
+    }
     image?: ImageBlock;
     document?: DocumentBlock;
     video?: VideoBlock;

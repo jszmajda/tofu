@@ -37,8 +37,15 @@ export function downloadConversationAsMarkdown(conversation: Conversation, userN
     } else {
       actorName = message.role.charAt(0).toUpperCase() + message.role.slice(1);
     }
-    markdownContent += `## ${actorName} (${timestamp})\n\n${message.content}\n\n`;
-    
+
+    markdownContent += `## ${actorName} (${timestamp})\n\n`;
+
+    if(message.reasoningContent && message.reasoningContent.length > 0) {
+      markdownContent += `### Reasoning:\n\n${message.reasoningContent.trim()}\n\n### Body:\n\n`; 
+    }
+
+    markdownContent += `${message.content.trimStart()}\n\n`;    
+
     markdownContent += '---\n\n';
   });
 

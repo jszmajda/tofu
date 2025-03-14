@@ -49,7 +49,11 @@ export const useMessageHandler = (
       for await (const message of sendConversation(model, systemPrompt, nextMessages, aiMessage)) {
         responseMessage.content = message.content;
         if (responseRef?.current) {
-          const parsedContent = await Promise.resolve(marked.parse(message.content));
+          const reasoningContent = message.reasoningContent || "";
+          let parsedContent = await Promise.resolve(marked.parse(message.content));
+          if (reasoningContent.length > 0) {
+            parsedContent = `<div class="text-xs italic opacity-50">${reasoningContent}</div>${parsedContent}`;
+          }
           responseRef.current.innerHTML = parsedContent;
 
           scrollHandlers.handleScroll(null);

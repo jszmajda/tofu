@@ -2,6 +2,7 @@ export type Message = {
   id: number;
   role: "assistant" | "user";
   content: string;
+  reasoningContent?: string;
   inputTokens?: number;
   outputTokens?: number;
   timestamp: Date;
