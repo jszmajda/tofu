@@ -6,14 +6,15 @@ Tofu is a desktop application built with Electron that provides an interface for
 
 ## Project Description
 
-Tofu is designed to facilitate conversations with AI models using Amazon's Bedrock service. The application allows users to select from different AI models, including various versions of Claude, and engage in chat-like interactions. 
+Tofu is designed to facilitate conversations with AI models using Amazon's Bedrock service. The application allows users to select from different AI models, and engage in chat-like interactions. 
 
 Key features of Tofu include:
 - Integration with Amazon Bedrock for AI model access
-- Support for multiple AI models, including Claude 3.5 Haiku and Claude 3.5 Sonnet versions
+- Support for multiple AI models, including Claude, Nova, and DeepSeek
 - Real-time streaming of AI responses
 - Conversation management with drag-and-drop reordering
 - Markdown support in messages with syntax highlighting
+- Code blocks with copy functionality
 - Dark mode support with customizable themes
 - Export conversations to JSON or Markdown
 - System prompt customization
@@ -81,5 +82,14 @@ The application can be configured through the Settings page, where you can:
 3. Using Obsidian integration:
    - Set your Obsidian vault path in Settings
    - Use `!!load filename` in your messages to include content from your vault
+
+4. Working with code:
+   - Code blocks are automatically formatted with syntax highlighting
+   - Copy buttons are available for both code blocks and entire messages
+   - Multi-line code blocks are distinguished from inline code for better readability
+
+5. Pasting content:
+   - Rich text pasting is supported with automatic conversion to markdown
+   - Images are automatically filtered from pastes to maintain text-based interactions
 
 Note: The application uses a secure preload script to handle AWS credentials and Obsidian vault access
